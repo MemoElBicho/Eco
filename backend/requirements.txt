@@ -1,0 +1,41 @@
+# Core
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+pydantic==2.*
+pydantic-settings==2.*
+
+# Database
+sqlalchemy[asyncio]==2.*
+asyncpg==0.30.*
+alembic==1.*
+
+# Auth
+python-jose[cryptography]==3.*
+bcrypt==4.0.*
+
+# Task Queue
+celery[redis]==5.*
+redis==5.*
+
+# AI
+langchain==0.3.*
+langchain-openai==0.3.*
+langchain-community==0.3.*
+langchain-text-splitters==0.3.*
+openai==1.*
+pgvector==0.3.*
+
+# Messaging
+httpx==0.28.*
+
+# Utils
+python-multipart==0.0.*
+pypdf==5.*
+python-dotenv==1.*
+
+# Testing
+pytest==8.*
+pytest-asyncio==0.*
+pytest-mock==3.*
+httpx==0.28.*
+email-validator>=2.0.0
