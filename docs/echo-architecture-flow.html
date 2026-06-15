@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo — Diagrama de Arquitectura React Flow</title>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xyflow/react@12/umd/index.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box }
+  html,body,#root { width:100%; height:100%; overflow:hidden }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#0b0b12 }
+  .react-flow__node { font-size:11px; width:auto; min-width:140px }
+  .react-flow__handle { width:8px; height:8px; border:2px solid #6366f1; background:#1e1e30 }
+  .react-flow__controls { background:#131320 !important; border:1px solid #1e1e30 !important; border-radius:8px }
+  .react-flow__controls-button { background:#1e1e30 !important; fill:#e2e8f0 !important; border-bottom:1px solid #2a2a40 !important }
+  .react-flow__minimap { background:#131320 !important; border:1px solid #1e1e30 !important; border-radius:8px }
+  .node-group { border-radius:16px; padding:12px; background:rgba(19,19,32,0.85); border:2px solid; backdrop-filter:blur(10px); min-width:180px }
+  .node-group h3 { font-size:13px; margin-bottom:6px; text-align:center; font-weight:700; letter-spacing:0.5px }
+  .node-item { padding:4px 8px; margin:3px 0; border-radius:6px; font-size:10px; text-align:center; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); white-space:nowrap }
+  .node-service { background:rgba(19,19,32,0.9); border:1px solid rgba(99,102,241,0.3); border-radius:10px; padding:8px 14px; text-align:center; font-size:12px; font-weight:600; color:#e2e8f0 }
+  .topleft { position:absolute; top:12px; left:12px; z-index:10; background:rgba(19,19,32,0.9); border:1px solid #1e1e30; border-radius:10px; padding:10px 16px; color:#e2e8f0 }
+  .topleft h2 { font-size:16px; background:linear-gradient(135deg,#6366f1,#8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent }
+  .legend { position:absolute; bottom:12px; left:12px; z-index:10; display:flex; gap:10px; font-size:10px; color:var(--muted) }
+  .legend span { display:flex; align-items:center; gap:4px }
+  .legend .dot { width:10px; height:10px; border-radius:3px }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useCallback } = React;
+const { ReactFlow, Controls, MiniMap, Background, Handle, Position, useNodesState, useEdgesState, MarkerType } = window.ReactFlow || {};
+
+// Fallback if CDN fails
+if (!window.ReactFlow) {
+  document.getElementById('root').innerHTML = 
+    '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;text-align:center;padding:2rem">'+
+    '<div><h1 style="color:#6366f1;font-size:2rem;margin-bottom:1rem">Echo Architecture</h1>'+
+    '<p style="max-width:600px">React Flow CDN no disponible offline. Abri este archivo con conexion a internet.</p></div></div>';
+}
+
+function EchoFlow() {
+  const nodeColor = (type) => {
+    const map = {
+      frontend: '#3b82f6', backend: '#6366f1', ai: '#8b5cf6', 
+      infra: '#f59e0b', external: '#22c55e', data: '#ec4899'
+    };
+    return map[type] || '#94a3b8';
+  };
+
+  const GroupNode = ({ data }) => (
+    <div className="node-group" style={{borderColor:nodeColor(data.type)}}>
+      <h3 style={{color:nodeColor(data.type)}}>{data.label}</h3>
+      {(data.items||[]).map((item,i) => <div key={i} className="node-item">{item}</div>)}
+      <Handle type="source" position={Position.Right} style={{background:nodeColor(data.type)}} />
+      <Handle type="target" position={Position.Left} style={{background:nodeColor(data.type)}} />
+      <Handle type="source" position={Position.Bottom} id="bottom" style={{background:nodeColor(data.type)}} />
+      <Handle type="target" position={Position.Top} id="top" style={{background:nodeColor(data.type)}} />
+    </div>
+  );
+
+  const ServiceNode = ({ data }) => (
+    <div className="node-service" style={{borderColor:nodeColor(data.type)}}>
+      {data.icon} {data.label}
+      <Handle type="source" position={Position.Right} />
+      <Handle type="target" position={Position.Left} />
+    </div>
+  );
+
+  const nodeTypes = { groupNode: GroupNode, serviceNode: ServiceNode };
+
+  const initialNodes = [
+    // ── ROW 1: CLIENTES / EXTERNAL ──
+    {id:'wa', type:'serviceNode', position:{x:50,y:20}, data:{label:'WhatsApp',icon:'💬',type:'external'}},
+    {id:'tg', type:'serviceNode', position:{x:220,y:20}, data:{label:'Telegram',icon:'📨',type:'external'}},
+    {id:'web', type:'serviceNode', position:{x:400,y:20}, data:{label:'Web Browser',icon:'🌐',type:'external'}},
+    {id:'stripe', type:'serviceNode', position:{x:560,y:20}, data:{label:'Stripe',icon:'💳',type:'external'}},
+    {id:'hubspot', type:'serviceNode', position:{x:700,y:120}, data:{label:'HubSpot',icon:'🏢',type:'external'}},
+    {id:'openai', type:'serviceNode', position:{x:880,y:200}, data:{label:'OpenAI GPT-4o',icon:'🧠',type:'external'}},
+
+    // ── ROW 2: FRONTEND VERCEL ──
+    {id:'vercel', type:'groupNode', position:{x:50,y:100}, data:{label:'Frontend (Vercel)',type:'frontend',items:[
+      'Next.js 15 (Turbopack)','React 19 + Tailwind','shadcn/ui + Base UI',
+      'Login / Register','Dashboard','Catalogo','Mis Bots','Leads','Conversaciones',
+      'Brain (RAG upload)','Settings','Pricing (Stripe)','Sidebar + Instance Selector',
+      'WebSocket client','api.ts (fetch wrapper)','localStorage (JWT token)'
+    ]}, style:{width:300}},
+
+    // ── ROW 3: BACKEND FASTAPI ──
+    {id:'fastapi', type:'groupNode', position:{x:420,y:130}, data:{label:'Backend (Render · FastAPI)',type:'backend',items:[
+      'Auth: register/login/me (JWT)','Catalog: GET /catalog/','Operators: CRUD + deploy',
+      'Leads: CRUD + search','Conversations: WS + messages + toggle_bot',
+      'Brain: upload + RAG query','Billing: Stripe checkout/portal','Settings: workspace config',
+      'Webhooks: WhatsApp, Telegram, Stripe, HubSpot','Health: GET /health',
+      'CORS Middleware','Global Exception Handler','Lifespan (alembic migrations)'
+    ]}, style:{width:340}},
+
+    // ── ROW 4: AI ENGINE ──
+    {id:'aiengine', type:'groupNode', position:{x:50,y:380}, data:{label:'AI Engine (Operator Engine)',type:'ai',items:[
+      'Agent Orchestrator','LLM Router (OpenAI GPT-4o)','RAG Retriever (pgvector)',
+      'Tool Registry (ToolBox)','Sentiment Analyzer (0-1 score)','Conversation Manager'
+    ]}, style:{width:280}},
+
+    {id:'tools', type:'groupNode', position:{x:400,y:380}, data:{label:'Tools (4 nativas)',type:'ai',items:[
+      'BrainTool: search knowledge base','CrmTool: create/update leads',
+      'EscalateTool: route to human','WebhookOutTool: external HTTP calls'
+    ]}, style:{width:260}},
+
+    // ── ROW 5: INFRASTRUCTURE ──
+    {id:'pg', type:'serviceNode', position:{x:50,y:580}, data:{label:'PostgreSQL 16',icon:'🗄️',type:'data'}},
+    {id:'redis', type:'serviceNode', position:{x:220,y:580}, data:{label:'Redis (Upstash)',icon:'⚡',type:'infra'}},
+    {id:'celery', type:'serviceNode', position:{x:420,y:580}, data:{label:'Celery Worker',icon:'🔧',type:'infra'}},
+    {id:'render', type:'serviceNode', position:{x:600,y:580}, data:{label:'Render (PaaS)',icon:'☁️',type:'infra'}},
+
+    // ── RIGHT: MODELS ──
+    {id:'models', type:'groupNode', position:{x:750,y:420}, data:{label:'Database Models (ORM)',type:'data',items:[
+      'User','Workspace','OperatorTemplate','OperatorInstance',
+      'Lead','Conversation','Message','BrainDocument','Subscription'
+    ]}, style:{width:220}},
+  ];
+
+  const initialEdges = [
+    // External → Frontend
+    {id:'wa-web',source:'wa',target:'web',animated:true,style:{stroke:'#22c55e'}},
+    {id:'tg-web',source:'tg',target:'web',animated:true,style:{stroke:'#22c55e'}},
+    {id:'stripe-web',source:'stripe',target:'web',animated:true,style:{stroke:'#22c55e'}},
+
+    // Frontend → Backend
+    {id:'vercel-api',source:'vercel',target:'fastapi',animated:true,label:'REST + WS',style:{stroke:'#3b82f6'},labelStyle:{fill:'#e2e8f0',fontSize:10},labelBgStyle:{fill:'#131320'}},
+
+    // Backend → AI Engine
+    {id:'api-ai',source:'fastapi',target:'aiengine',sourceHandle:'bottom',targetHandle:'top',animated:true,label:'process_message()',style:{stroke:'#8b5cf6'},labelStyle:{fill:'#e2e8f0',fontSize:9},labelBgStyle:{fill:'#131320'}},
+    {id:'ai-tools',source:'aiengine',target:'tools',animated:true,style:{stroke:'#8b5cf6'}},
+
+    // Backend → Models
+    {id:'api-models',source:'fastapi',target:'models',animated:true,style:{stroke:'#ec4899'}},
+
+    // AI → External
+    {id:'ai-openai',source:'aiengine',target:'openai',animated:true,style:{stroke:'#22c55e'},label:'GPT-4o API',labelStyle:{fill:'#e2e8f0',fontSize:9},labelBgStyle:{fill:'#131320'}},
+    {id:'tools-hubspot',source:'tools',target:'hubspot',animated:true,style:{stroke:'#22c55e'}},
+
+    // Infrastructure connections
+    {id:'api-pg',source:'fastapi',target:'pg',sourceHandle:'bottom',animated:true,style:{stroke:'#f59e0b'},label:'SQLAlchemy async',labelStyle:{fill:'#e2e8f0',fontSize:9},labelBgStyle:{fill:'#131320'}},
+    {id:'ai-pg',source:'aiengine',target:'pg',sourceHandle:'bottom',animated:true,style:{stroke:'#f59e0b'},label:'pgvector (embeddings)',labelStyle:{fill:'#e2e8f0',fontSize:8},labelBgStyle:{fill:'#131320'}},
+    {id:'api-redis',source:'fastapi',target:'redis',sourceHandle:'bottom',animated:true,style:{stroke:'#f59e0b'},label:'task queue',labelStyle:{fill:'#e2e8f0',fontSize:9},labelBgStyle:{fill:'#131320'}},
+    {id:'redis-celery',source:'redis',target:'celery',animated:true,style:{stroke:'#f59e0b'}},
+    {id:'celery-pg',source:'celery',target:'pg',animated:true,style:{stroke:'#f59e0b'}},
+    {id:'render-fa',source:'render',target:'fastapi',animated:true,style:{stroke:'#f59e0b',strokeDasharray:'5 5'}},
+
+    // Stripe webhooks
+    {id:'stripe-api',source:'stripe',target:'fastapi',animated:true,style:{stroke:'#22c55e'},label:'webhook',labelStyle:{fill:'#e2e8f0',fontSize:9},labelBgStyle:{fill:'#131320'}},
+
+    // Webhooks to Backend
+    {id:'wa-api',source:'wa',target:'fastapi',animated:true,style:{stroke:'#22c55e'},label:'/webhooks/whatsapp',labelStyle:{fill:'#e2e8f0',fontSize:8},labelBgStyle:{fill:'#131320'}},
+    {id:'tg-api',source:'tg',target:'fastapi',animated:true,style:{stroke:'#22c55e'},label:'/webhooks/telegram',labelStyle:{fill:'#e2e8f0',fontSize:8},labelBgStyle:{fill:'#131320'}},
+    {id:'hubspot-api',source:'hubspot',target:'fastapi',animated:true,style:{stroke:'#22c55e'},label:'/webhooks/hubspot',labelStyle:{fill:'#e2e8f0',fontSize:8},labelBgStyle:{fill:'#131320'}},
+  ];
+
+  const [nodes] = useNodesState(initialNodes);
+  const [edges] = useEdgesState(initialEdges);
+
+  return (
+    <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView defaultEdgeOptions={{markerEnd:{type:MarkerType.ArrowClosed,width:14,height:14,color:'#6366f1'}}}>
+      <Controls />
+      <MiniMap nodeStrokeColor="#6366f1" maskColor="rgba(11,11,18,0.6)" style={{background:'#131320'}} />
+      <Background color="#1e1e30" gap={20} />
+    </ReactFlow>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(EchoFlow));
+</script>
+</body>
+</html>

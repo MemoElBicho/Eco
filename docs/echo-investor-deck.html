@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo — Plataforma de Operadores Autónomos con IA | Investment Deck</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #131320;
+    --border: #1e1e30;
+    --accent: #6366f1;
+    --accent2: #8b5cf6;
+    --gold: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+  * { margin:0; padding:0; box-sizing:border-box }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  /* Cover */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 30%, rgba(99,102,241,0.15), transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.1), transparent 50%),
+                var(--bg);
+    padding: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .cover h1 { font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; letter-spacing: -2px; background: linear-gradient(135deg, var(--accent), var(--accent2), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem }
+  .cover .tagline { font-size: 1.4rem; color: var(--muted); max-width: 600px; margin-bottom: 2rem }
+  .cover .meta { color: var(--muted); font-size: 0.9rem; margin-top: 3rem }
+
+  /* Layout */
+  .container { max-width: 1000px; margin: 0 auto; padding: 4rem 2rem }
+  section { margin-bottom: 5rem; padding-top: 1rem }
+  h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff; position: relative; display: inline-block }
+  h2::after { content: ''; display: block; width: 60px; height: 3px; background: var(--accent); margin-top: 8px; border-radius: 2px }
+  h3 { font-size: 1.3rem; font-weight: 600; color: #fff; margin: 1.5rem 0 0.7rem }
+  p { color: var(--muted); margin-bottom: 1rem; max-width: 800px }
+  ul { list-style: none; padding-left: 0 }
+  ul > li { position: relative; padding-left: 1.5rem; margin-bottom: 0.6rem; color: var(--muted) }
+  ul > li::before { content: '▸'; position: absolute; left: 0; color: var(--accent) }
+
+  /* Cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin: 2rem 0 }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px) }
+  .card .icon { font-size: 2rem; margin-bottom: 1rem }
+  .card h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: #fff }
+  .card p { font-size: 0.9rem; color: var(--muted); margin: 0 }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin: 2rem 0 }
+  .kpi {
+    background: linear-gradient(135deg, var(--surface), #1a1a30);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .kpi .num { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent }
+  .kpi .label { font-size: 0.85rem; color: var(--muted); margin-top: 0.3rem }
+
+  /* Diagram */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: pre;
+  }
+
+  /* Price table */
+  .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin: 2rem 0 }
+  .plan {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .plan.featured { border-color: var(--accent); box-shadow: 0 0 30px rgba(99,102,241,0.1) }
+  .plan .pname { font-size: 1.2rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem }
+  .plan .pprice { font-size: 2.5rem; font-weight: 800; color: var(--accent); margin: 1rem 0 }
+  .plan .pprice small { font-size: 1rem; color: var(--muted); font-weight: 400 }
+  .plan .feats { list-style: none; padding: 0; text-align: left; margin-top: 1.5rem }
+  .plan .feats li { padding: 5px 0; font-size: 0.9rem; color: var(--muted) }
+
+  /* Comparison */
+  .comparison { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.9rem }
+  .comparison th, .comparison td { padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--border) }
+  .comparison th { background: var(--surface); font-weight: 600; color: #fff; font-size: 0.85rem }
+  .comparison td:first-child { text-align: left; color: var(--muted) }
+  .comparison .highlight { background: rgba(99,102,241,0.08) }
+  .check { color: var(--green) }
+  .cross { color: var(--red) }
+  .partial { color: var(--gold) }
+
+  /* Flow */
+  .flow-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; margin: 2rem 0 }
+  .flow-box { background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; text-align: center; min-width: 120px }
+  .flow-box strong { display: block; font-size: 0.9rem; color: #fff }
+  .flow-box small { font-size: 0.75rem; color: var(--muted) }
+  .flow-arrow { font-size: 1.5rem; color: var(--accent); font-weight: bold }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 2rem; margin: 2rem 0 }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border) }
+  .timeline-item { position: relative; margin-bottom: 2rem }
+  .timeline-item::before { content: ''; position: absolute; left: -2rem; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg) }
+  .timeline-item h4 { margin-bottom: 0.2rem }
+  .timeline-item p { font-size: 0.9rem; margin: 0 }
+
+  /* CTA */
+  .cta {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1));
+    border-radius: 24px;
+    margin: 4rem 0 2rem;
+    border: 1px solid var(--border);
+  }
+  .cta h2 { display: block; margin-bottom: 1rem }
+  .cta h2::after { display: none }
+  .cta p { margin: 0 auto 1.5rem; font-size: 1.1rem }
+
+  @media print {
+    body { background: #fff; color: #111; font-size: 12px }
+    .cover { min-height: auto; background: #fff; border: none; padding: 2rem }
+    .cover h1 { -webkit-text-fill-color: #6366f1; color: #6366f1 }
+    section { margin-bottom: 2rem; page-break-inside: avoid }
+    .card, .kpi, .plan, .diagram { background: #f8f8ff; border: 1px solid #ddd; box-shadow: none }
+    .card:hover { transform: none }
+    .container { padding: 1rem }
+    h2 { color: #111 }
+    p, ul > li { color: #444 }
+    .cta { background: #f8f8ff; border: 1px solid #ddd }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <h1>Echo</h1>
+  <p class="tagline">Plataforma SaaS de operadores autónomos con IA generativa. Despliega vendedores, agentes de soporte y cobradores omnicanal en menos de 5 minutos, sin escribir una línea de código.</p>
+  <div class="meta">Documento para Inversores · Junio 2026 · Confidencial</div>
+</div>
+
+<div class="container">
+
+<!-- 1. RESUMEN EJECUTIVO -->
+<section id="resumen">
+  <h2>Resumen Ejecutivo</h2>
+  <p><strong>Echo</strong> es una plataforma <em>low-code / no-code</em> que permite a empresas de cualquier tamaño crear, configurar y desplegar <strong>operadores autónomos potenciados por IA</strong> (LLMs) en canales como WhatsApp, Telegram y web.</p>
+  <p>Cada operador viene equipado con un stack completo de herramientas: base de conocimiento (RAG), CRM de leads, sistema de escalamiento a humanos, webhooks de salida, y procesador de pagos vía Stripe. El usuario solo elige una plantilla, configura 2-3 parámetros, y en minutos tiene un agente productivo atendiendo clientes 24/7.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="num">5</div><div class="label">Plantillas pre-entrenadas</div></div>
+    <div class="kpi"><div class="num">5</div><div class="label">Canales soportados</div></div>
+    <div class="kpi"><div class="num">4</div><div class="label">Herramientas nativas</div></div>
+    <div class="kpi"><div class="num">&lt;5 min</div><div class="label">Tiempo de deploy</div></div>
+  </div>
+</section>
+
+<!-- 2. PROBLEMA Y SOLUCIÓN -->
+<section id="problema">
+  <h2>Problema y Solución</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">💰</div>
+      <h4>El problema</h4>
+      <p>Contratar y entrenar vendedores o agentes de soporte para atender WhatsApp, Telegram y web cuesta entre $800–$2,500 USD/mes por persona. Un equipo de 5 agentes supera los $120K USD/año. Las alternativas actuales de "chatbot" son rígidas, basadas en árboles de decisión, y requieren equipos técnicos para mantenerlas.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🚀</div>
+      <h4>La solución</h4>
+      <p>Echo reemplaza 5 agentes humanos con 1 plataforma que cuesta el 10% de ese presupuesto. El operador entiende lenguaje natural (gracias a LLMs), usa herramientas (CRM, pagos), y aprende de documentos (RAG). Todo configurable por un gerente sin conocimientos técnicos en 5 minutos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. ARQUITECTURA Y FUNCIONAMIENTO -->
+<section id="arquitectura">
+  <h2>¿Cómo funciona Echo?</h2>
+
+  <p>La arquitectura de Echo sigue un diseño moderno de microservicios con separación clara entre frontend, backend, workers asíncronos y almacenamiento.</p>
+
+  <div class="diagram">
+┌──────────────────────────────────────────────────────────────────────┐
+│                        ECHO · ARQUITECTURA GLOBAL                       │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌──────────┐    ┌──────────┐    ┌──────────────────────────────┐    │
+│  │ WhatsApp │    │ Telegram │    │    Web (Next.js + Vercel)     │    │
+│  │ (Meta)   │    │ (Bot API)│    │  eco-nine-beta.vercel.app     │    │
+│  └────┬─────┘    └────┬─────┘    └──────────────┬───────────────┘    │
+│       │               │                         │                     │
+│       └───────────────┼─────────────────────────┘                     │
+│                       │ HTTPS + WebSocket                             │
+│                       ▼                                               │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │              FASTAPI BACKEND (Render · free tier)              │    │
+│  │          eco-backend-oqp3.onrender.com                         │    │
+│  │                                                                │    │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │   │
+│  │  │ Auth JWT │ │ Catalog  │ │ Operators│ │ Conversations    │ │   │
+│  │  │ register  │ │ /catalog │ │ CRUD +   │ │ WS + Messages    │ │   │
+│  │  │ login     │ │          │ │ deploy   │ │ + toggle_bot     │ │   │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘ │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │   │
+│  │  │ Leads    │ │ Brain    │ │ Billing  │ │ Webhooks         │ │   │
+│  │  │ CRUD     │ │ RAG docs │ │ Stripe   │ │ WhatsApp/Telegram│ │   │
+│  │  │ +HubSpot │ │ upload   │ │ checkout │ │ + HubSpot        │ │   │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘ │   │
+│  │                                                                │    │
+│  │  Alembic Migrations (auto-run on startup)                      │    │
+│  └──────────────────────────┬───────────────────────────────────┘    │
+│                             │                                         │
+│         ┌───────────────────┼───────────────────┐                     │
+│         ▼                   ▼                   ▼                     │
+│  ┌─────────────┐   ┌──────────────┐   ┌──────────────────┐          │
+│  │ PostgreSQL  │   │    Redis     │   │   Celery Worker  │          │
+│  │ (Render DB) │   │ (Upstash/    │   │  AI Tasks        │          │
+│  │ free tier   │   │  external)   │   │  Webhooks        │          │
+│  └─────────────┘   └──────────────┘   │  Notifications   │          │
+│                                       └──────────────────┘          │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │                   AI ENGINE (Operator Engine)                 │    │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │   │
+│  │  │ LLM Call │ │ RAG      │ │ Tool Use │ │ Sentiment        │ │   │
+│  │  │ (OpenAI  │ │ (pgvector│ │ (CRM,    │ │ Analysis         │ │   │
+│  │  │ GPT-4o)  │ │ embed)   │ │ Brain,   │ │ (0-1 score)      │ │   │
+│  │  │          │ │          │ │ Escalate)│ │                  │ │   │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘ │   │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <h3>Flujo de una conversación</h3>
+  <div class="flow-row">
+    <div class="flow-box"><strong>1. Cliente</strong><small>WhatsApp/Telegram</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>2. Webhook</strong><small>Recibe mensaje</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>3. Celery</strong><small>Encola proceso</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>4. LLM + RAG</strong><small>Genera respuesta</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>5. Tool Calls</strong><small>CRM / Brain / Pago</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>6. Respuesta</strong><small>Al canal original</small></div>
+  </div>
+</section>
+
+<!-- 4. VENTAJAS COMPETITIVAS -->
+<section id="ventajas">
+  <h2>¿Qué tiene Echo que no tienen sus competidores?</h2>
+  <table class="comparison">
+    <thead>
+      <tr>
+        <th>Capacidad</th>
+        <th>Echo</th>
+        <th>Chatbase / Dante</th>
+        <th>Botpress / Voiceflow</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Despliegue en &lt;5 min sin código</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr class="highlight">
+        <td>Herramientas nativas (CRM, pagos, RAG)</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="partial">◐</span></td>
+      </tr>
+      <tr>
+        <td>Omnicanal (WhatsApp + Telegram + Web)</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="check">✓</span></td>
+      </tr>
+      <tr class="highlight">
+        <td>Base de conocimiento (RAG con pgvector)</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td>CRM de leads integrado</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr class="highlight">
+        <td>Sistema de escalamiento a humanos</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="partial">◐</span></td>
+      </tr>
+      <tr>
+        <td>5 plantillas pre-entrenadas con tools</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr class="highlight">
+        <td>Integración Stripe (checkout + portal)</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td>Latam-ready (idioma español nativo)</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr class="highlight">
+        <td>Webhooks out (integración externa)</td>
+        <td><span class="check">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="partial">◐</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Diferenciador clave</h3>
+  <p>Nadie más en el mercado ofrece <strong>plantilla → deploy → CRM → pagos → escalamiento</strong> en un solo flujo cohesivo. Los competidores son o bien chatbots simples (Chatbase), o bien builders de flujos sin IA (Botpress). Echo es la <strong>única plataforma que unifica agente LLM + CRM + pagos + RAG + escalamiento</strong> con cero código y foco en el mercado hispanohablante.</p>
+</section>
+
+<!-- 5. CASOS DE USO -->
+<section id="casos">
+  <h2>Casos de Uso para Venta</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🏪</div>
+      <h4>Ecommerce y Retail</h4>
+      <p>Agente de ventas omnicanal que responde preguntas de productos desde catálogo (RAG), califica leads automáticamente (CRM), y envía links de pago por WhatsApp (Stripe). Caso ideal: tiendas Shopify, MercadoLibre sellers, dropshipping.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏥</div>
+      <h4>Clínicas y Salud</h4>
+      <p>Operador de soporte que agenda citas, responde preguntas frecuentes desde documentos clínicos, notifica recordatorios, y escala casos urgentes a un médico. Ideal para consultorios, clínicas dentales, laboratorios.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏢</div>
+      <h4>Inmobiliarias</h4>
+      <p>Bot que muestra propiedades desde catálogo RAG, programa visitas, captura datos de prospecto en CRM, y envía fichas técnicas por WhatsApp. Atención 24/7 sin depender de horarios de oficina.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎓</div>
+      <h4>Educación</h4>
+      <p>Onboarding automatizado de nuevos alumnos, respuestas desde manuales y reglamentos, envío de materiales, recordatorios de pagos. Escalamiento a coordinador académico cuando se requiere intervención humana.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🍽️</div>
+      <h4>Restaurantes</h4>
+      <p>Toma de pedidos por WhatsApp, consulta de menú desde knowledge base, notificación de tiempo de entrega, y enlace de pago directo. Reduce errores de toma de pedidos y libera al personal.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏦</div>
+      <h4>Fintech y Cobranza</h4>
+      <p>Recordatorios de pago automáticos, negociación de planes de pago, consulta de saldos, y derivación a ejecutivo humano para casos complejos. Reduce la morosidad con seguimiento automatizado y profesional.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6. PRECIOS -->
+<section id="precios">
+  <h2>Estrategia de Precios</h2>
+  <p><strong>Recomendación: modelo de suscripción mensual con 3 tiers.</strong> Un pago único no es sostenible — los costos de infraestructura (LLM, servidores, base de datos) son recurrentes. La suscripción alinea incentivos (el cliente paga mientras recibe valor) y genera MRR predecible para inversores.</p>
+
+  <div class="pricing">
+    <div class="plan">
+      <div class="pname">Starter</div>
+      <div class="pprice">$79<small>/mes</small></div>
+      <ul class="feats">
+        <li>1 operador activo</li>
+        <li>1 canal (WhatsApp)</li>
+        <li>500 conversaciones/mes</li>
+        <li>CRM básico</li>
+        <li>10 documentos RAG</li>
+        <li>Soporte por email</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="pname">Pro</div>
+      <div class="pprice">$249<small>/mes</small></div>
+      <ul class="feats">
+        <li>5 operadores activos</li>
+        <li>Todos los canales</li>
+        <li>5,000 conversaciones/mes</li>
+        <li>CRM completo + HubSpot</li>
+        <li>50 documentos RAG</li>
+        <li>Pagos Stripe integrados</li>
+        <li>Soporte prioritario</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="pname">Enterprise</div>
+      <div class="pprice">$799<small>/mes</small></div>
+      <ul class="feats">
+        <li>Operadores ilimitados</li>
+        <li>Todos los canales</li>
+        <li>Conversaciones ilimitadas</li>
+        <li>CRM + HubSpot + Analytics</li>
+        <li>Documentos RAG ilimitados</li>
+        <li>Pagos Stripe + Onboarding</li>
+        <li>Slack + account manager</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Proyección financiera (año 1)</h3>
+  <table class="comparison">
+    <thead>
+      <tr><th></th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Clientes</td><td>15</td><td>45</td><td>100</td><td>200</td></tr>
+      <tr><td>MRR estimado</td><td>$2,500</td><td>$8,000</td><td>$20,000</td><td>$42,000</td></tr>
+      <tr><td>Costo infra (LLM+servers)</td><td>$400</td><td>$1,200</td><td>$2,800</td><td>$5,600</td></tr>
+      <tr><td>Margen bruto</td><td>84%</td><td>85%</td><td>86%</td><td>87%</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:1rem;font-size:0.9rem;color:var(--muted)">Target: 200 clientes al año 1 = <strong>$42K MRR ($504K ARR)</strong>. Costo de adquisición estimado: $150/cliente vía ads + content marketing. CAC payback: &lt;2 meses.</p>
+</section>
+
+<!-- 7. ÁREAS DE MEJORA -->
+<section id="mejora">
+  <h2>Áreas de Mejora Prioritarias</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <h4>Fase 1 — Estabilización (1-2 meses)</h4>
+      <p>Migrar infraestructura de free tier a planes pagos (Render/Upstash). Eliminar cold starts (&lt;30s actualmente). Configurar Redis externo para Celery (tareas asíncronas actualmente sin broker). Implementar CI/CD con tests automáticos pre-deploy. Agregar rate limiting y protección anti-abuso.</p>
+    </div>
+    <div class="timeline-item">
+      <h4>Fase 2 — Plataforma comercial (2-4 meses)</h4>
+      <p>Dashboard de analytics (conversaciones, leads, revenue atribuido). Onboarding guiado paso a paso. Multi-workspace y RBAC (roles: admin, manager, agent). Panel de billing con facturación automática (Stripe). Webhook avanzado con reintentos y logs. SDK para desarrolladores (API pública documentada).</p>
+    </div>
+    <div class="timeline-item">
+      <h4>Fase 3 — Escalamiento (4-8 meses)</h4>
+      <p>Marketplace de plantillas comunitarias. Soporte para múltiples LLMs (Gemini, Claude, Llama) vía LiteLLM. Multi-idioma automático (detección + respuesta en 20+ idiomas). Voice agents (llamadas telefónicas con IA). Integraciones nativas: Salesforce, Zendesk, HubSpot deep sync. iOS/Android app para gestión de agentes en móvil.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8. TRACCIÓN Y MÉTRICAS -->
+<section id="traccion">
+  <h2>Tracción Actual</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="num">✓</div><div class="label">Backend deployado (Render)</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">Frontend deployado (Vercel)</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">E2E Tests (Playwright)</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">5 Plantillas activas</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">DB seed con datos demo</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">Stripe integración</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">Webhooks WhatsApp + Telegram</div></div>
+    <div class="kpi"><div class="num">✓</div><div class="label">CORS + Seguridad + CSP</div></div>
+  </div>
+  <p>El MVP está <strong>100% funcional y desplegado en producción</strong>. El producto puede recibir clientes hoy. Las tareas pendientes son de hardening y escalamiento, no de construcción desde cero.</p>
+</section>
+
+<!-- 9. EQUIPO Y TECH STACK -->
+<section id="tech">
+  <h2>Stack Tecnológico</h2>
+  <div class="cards">
+    <div class="card">
+      <h4>Frontend</h4>
+      <p>Next.js 15 (Turbopack), React 19, Tailwind CSS, shadcn/ui, Base UI, Playwright, Vercel</p>
+    </div>
+    <div class="card">
+      <h4>Backend</h4>
+      <p>FastAPI (Python 3.11), Uvicorn, SQLAlchemy 2 async, Alembic, Pydantic v2, Celery, Render</p>
+    </div>
+    <div class="card">
+      <h4>AI/ML</h4>
+      <p>LangChain, OpenAI GPT-4o, pgvector (RAG), tiktoken, custom tool orchestration</p>
+    </div>
+    <div class="card">
+      <h4>Infra</h4>
+      <p>PostgreSQL 16, Redis (Upstash), Stripe, Docker multi-stage, GitHub Actions</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10. ROADMAP -->
+<section id="roadmap">
+  <h2>Roadmap — Próximos 12 Meses</h2>
+  <div class="flow-row" style="flex-wrap: wrap;">
+    <div class="flow-box"><strong>MES 1-2</strong><small>Migrar a paid infra<br>Redis real<br>CI/CD + rate limit</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>MES 3-4</strong><small>Onboarding UX<br>Analytics dashboard<br>Multi-workspace + RBAC</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>MES 5-6</strong><small>Stripe billing auto<br>API docs pública<br>Webhook avanzado</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>MES 7-9</strong><small>Marketplace<br>Multi-LLM (Gemini, Claude)<br>Multi-idioma</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><strong>MES 10-12</strong><small>Voice agents<br>Apps iOS/Android<br>Salesforce + Zendesk</small></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>¿Por qué invertir en Echo?</h2>
+  <p>El mercado de agentes conversacionales con IA crecerá de $7.6B (2024) a $45B+ en 2030 (CAGR 34%). Echo ataca el segmento más desatendido: <strong>PYMES latinoamericanas que necesitan automatizar ventas y soporte en WhatsApp sin equipos técnicos ni presupuestos enterprise.</strong></p>
+  <p style="font-size:1.2rem;color:#fff;font-weight:600">Producto funcional · Mercado masivo · Barrera de entrada baja · Margen del 85%+</p>
+</div>
+
+</div>
+</body>
+</html>
