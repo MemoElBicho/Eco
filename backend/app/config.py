@@ -53,6 +53,11 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production(self):
+        if self.database_url.startswith("postgresql://"):
+            self.database_url = self.database_url.replace(
+                "postgresql://", "postgresql+asyncpg://", 1
+            )
+
         if self.environment != "production":
             return self
 
