@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('CRM Leads', () => {
   test('create and delete a lead', async ({ page }) => {
     await page.goto('/leads');
-    await expect(page.getByText('CRM Leads')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Add Lead' }).click();
     await expect(page.getByRole('heading', { name: 'New Lead' })).toBeVisible();
