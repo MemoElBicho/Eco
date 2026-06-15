@@ -100,7 +100,7 @@ export interface UserOut {
 export interface LeadOut {
   id: string; workspace_id: string; name: string | null; phone: string | null;
   email: string | null; channel: string; channel_user_id: string; status: string;
-  sentiment: number; sentiment_label: string;
+  sentiment: number; sentiment_label: string; bot_active: boolean;
   notes: string | null; created_at: string; updated_at: string;
   hs_contact_id: string | null; hs_last_sync: string | null;
 }
