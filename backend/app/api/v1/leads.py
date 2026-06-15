@@ -54,7 +54,10 @@ async def create_lead(
         db.add(lead)
         await db.commit()
         await db.refresh(lead)
-        sync_lead_to_hubspot_task.delay(str(lead.id), str(user.workspace_id))
+        try:
+            sync_lead_to_hubspot_task.delay(str(lead.id), str(user.workspace_id))
+        except Exception:
+            pass
         return _to_out(lead)
     except Exception as e:
         print(f"Error in POST /leads: {e}")
