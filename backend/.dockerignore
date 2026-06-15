@@ -6,7 +6,6 @@
 .env
 .venv
 tests/
-alembic/
 seed_data.py
 seed_operators.py
 register_webhook.py
