@@ -32,7 +32,11 @@ class LeadOut(BaseModel):
     channel_user_id: str
     status: str
     bot_active: bool = True
+    sentiment: float = 0.0
+    sentiment_label: str = "neutral"
     notes: str | None
+    hs_contact_id: str | None = None
+    hs_last_sync: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

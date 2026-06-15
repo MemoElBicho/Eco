@@ -12,6 +12,7 @@ from app.models.user import User
 from app.schemas.conversation import ConversationOut, MessageOut
 from app.schemas.lead import ManualSendIn
 from app.core.websocket import manager
+from app.services.limits import check_free_plan_limits
 
 router = APIRouter(prefix="/conversations")
 
@@ -43,6 +44,8 @@ async def list_conversations(
             lead_name=row.Lead.name,
             channel=row.Lead.channel,
             bot_active=row.Lead.bot_active,
+            sentiment=row.Lead.sentiment or 0.0,
+            sentiment_label=row.Lead.sentiment_label or "neutral",
             last_message_at=row.last_ts,
             message_count=row.cnt or 0,
             last_message=None,
@@ -99,6 +102,8 @@ async def send_manual(
     )
     lead = result.scalars().first()
 
+    await check_free_plan_limits(db, user.workspace_id, "messages")
+
     msg = Message(
         workspace_id=user.workspace_id,
         channel=lead.channel,
@@ -113,11 +118,21 @@ async def send_manual(
     await db.commit()
 
     if lead.channel == "whatsapp":
-        from app.services.whatsapp_client import send_message as wa_send
-        await wa_send(db, str(user.workspace_id), lead.channel_user_id, body.content)
+        from app.services.whatsapp_client import send_whatsapp_message as wa_send
+        await wa_send(
+            lead.channel_user_id,
+            body.content,
+            str(lead.operator_instance_id or user.workspace_id),
+            db,
+        )
     elif lead.channel == "telegram":
-        from app.services.telegram_client import send_message as tg_send
-        await tg_send(db, str(user.workspace_id), lead.channel_user_id, body.content)
+        from app.services.telegram_client import send_telegram_message as tg_send
+        await tg_send(
+            lead.channel_user_id,
+            body.content,
+            str(lead.operator_instance_id or user.workspace_id),
+            db,
+        )
 
     await manager.broadcast(str(user.workspace_id), {
         "type": "new_message",

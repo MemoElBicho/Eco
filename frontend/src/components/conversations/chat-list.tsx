@@ -58,9 +58,18 @@ export function ChatList({
                       {(c.lead_name || "?").slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1.5">
-                      <p className="truncate text-sm font-medium">{c.lead_name || "Unknown"}</p>
+                      <p className="truncate text-sm font-medium">
+                        <span
+                          className={`mr-1.5 inline-block size-2 rounded-full ${
+                            c.sentiment_label === "positive" ? "bg-green-500" :
+                            c.sentiment_label === "negative" ? "bg-red-500" : "bg-yellow-500"
+                          }`}
+                          title={`Sentiment: ${c.sentiment.toFixed(2)}`}
+                        />
+                        {c.lead_name || "Unknown"}
+                      </p>
                       <span className="shrink-0 text-[0.65rem] text-muted-foreground">
                         {new Date(c.last_message_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>

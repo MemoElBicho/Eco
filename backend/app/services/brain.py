@@ -8,13 +8,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models.brain_document import BrainDocument
+from app.models.operator_instance import OperatorInstance
 
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 TOP_K = 3
 VECTOR_DIM = 3072
 EMBED_MODEL = "gemini-embedding-001"
-GEMINI_EMBED_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{EMBED_MODEL}:embedContent"
+GEMINI_EMBED_URL = (
+    f"https://generativelanguage.googleapis.com/v1beta/models/{EMBED_MODEL}:embedContent"
+)
 
 
 def _should_mock() -> bool:
@@ -29,26 +32,49 @@ async def _embed(text: str) -> list[float]:
         resp = await client.post(
             GEMINI_EMBED_URL,
             params={"key": settings.openai_api_key},
-            json={"model": f"models/{EMBED_MODEL}", "content": {"parts": [{"text": text}]}},
+            json={
+                "model": f"models/{EMBED_MODEL}",
+                "content": {"parts": [{"text": text}]},
+            },
         )
         resp.raise_for_status()
         return resp.json()["embedding"]["values"]
 
 
-async def ingest(file_bytes: bytes, filename: str, workspace_id: str, db: AsyncSession):
+async def ingest(
+    file_bytes: bytes,
+    filename: str,
+    instance_id: str,
+    db: AsyncSession,
+    workspace_id: str | None = None,
+):
+    if workspace_id is None:
+        result = await db.execute(
+            select(OperatorInstance.organization_id).where(
+                OperatorInstance.id == instance_id
+            )
+        )
+        row = result.first()
+        workspace_id = str(row[0]) if row else None
+
     if filename.endswith(".pdf"):
         reader = PdfReader(BytesIO(file_bytes))
-        text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        text = "\n".join(
+            page.extract_text() or "" for page in reader.pages
+        )
     else:
         text = file_bytes.decode("utf-8")
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
+    )
     chunks = splitter.split_text(text)
 
     for idx, chunk in enumerate(chunks):
         vec = await _embed(chunk)
         doc = BrainDocument(
             workspace_id=workspace_id,
+            operator_instance_id=instance_id,
             filename=filename,
             chunk_index=idx,
             content=chunk,
@@ -59,13 +85,30 @@ async def ingest(file_bytes: bytes, filename: str, workspace_id: str, db: AsyncS
     await db.commit()
 
 
-async def query_brain(query: str, workspace_id: str, db: AsyncSession, top_k: int = TOP_K):
+async def query_brain(
+    query: str,
+    scope_id: str,
+    db: AsyncSession,
+    top_k: int = TOP_K,
+    fallback_workspace_id: str | None = None,
+):
     vec = await _embed(query)
 
     result = await db.execute(
         select(BrainDocument.content)
-        .where(BrainDocument.workspace_id == workspace_id)
+        .where(BrainDocument.operator_instance_id == scope_id)
         .order_by(BrainDocument.embedding.cosine_distance(vec))
         .limit(top_k)
     )
-    return [row for (row,) in result.fetchall()]
+    rows = [row for (row,) in result.fetchall()]
+
+    if not rows and fallback_workspace_id:
+        result = await db.execute(
+            select(BrainDocument.content)
+            .where(BrainDocument.workspace_id == fallback_workspace_id)
+            .order_by(BrainDocument.embedding.cosine_distance(vec))
+            .limit(top_k)
+        )
+        rows = [row for (row,) in result.fetchall()]
+
+    return rows

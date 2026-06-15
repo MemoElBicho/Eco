@@ -18,5 +18,7 @@ class WorkspaceConfig(Base):
     whatsapp_verify_token = Column(String(255), nullable=True)
     telegram_bot_token = Column(String(255), nullable=True)
     openai_api_key = Column(String(512), nullable=True)
+    hubspot_access_token = Column(String(512), nullable=True)
+    hubspot_portal_id = Column(String(255), nullable=True)
 
     workspace = relationship("Workspace")

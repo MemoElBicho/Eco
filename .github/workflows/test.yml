@@ -1,0 +1,109 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: eco_db
+          POSTGRES_USER: eco
+          POSTGRES_PASSWORD: eco_secret
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U eco -d eco_db"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://eco:eco_secret@localhost:5432/eco_db
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key-change-me
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Create test database
+        run: PGPASSWORD=eco_secret psql -h localhost -U eco -d eco_db -c "CREATE DATABASE eco_test" || true
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run Alembic migrations
+        working-directory: backend
+        run: alembic upgrade head
+
+      - name: Run backend tests
+        working-directory: backend
+        run: pytest -v
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend for E2E
+        working-directory: backend
+        run: |
+          nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > /dev/null 2>&1 &
+          for i in $(seq 1 15); do curl -s http://localhost:8000/health && break || sleep 2; done
+
+      - name: Run E2E tests
+        working-directory: frontend
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload Playwright test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: frontend/test-results/
+          retention-days: 7

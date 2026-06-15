@@ -1,6 +1,7 @@
 # Core
 fastapi==0.115.*
 uvicorn[standard]==0.34.*
+gunicorn==23.*
 pydantic==2.*
 pydantic-settings==2.*
 
@@ -27,6 +28,9 @@ pgvector==0.3.*
 
 # Messaging
 httpx==0.28.*
+
+# Billing
+stripe==11.*
 
 # Utils
 python-multipart==0.0.*

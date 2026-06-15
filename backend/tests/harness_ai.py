@@ -3,6 +3,8 @@ import sys
 import uuid
 
 from app.database import async_session
+from app.models.operator_instance import OperatorInstance
+from app.models.operator_template import OperatorTemplate
 from app.models.workspace import Workspace
 from app.services.brain import ingest, query_brain
 
@@ -53,7 +55,38 @@ async def run():
         wid = str(ws.id)
         print(f"Workspace {wid} created")
 
-        await ingest(SAMPLE_TXT.encode("utf-8"), "catalogo_ecoparts.txt", wid, db)
+        tpl = OperatorTemplate(
+            slug="eco-ventas",
+            name="Eco Ventas",
+            category="ventas",
+            system_prompt_template="Eres {bot_name} de {company_name}.",
+            default_tools=["brain", "crm"],
+            default_channels=["whatsapp", "telegram"],
+        )
+        db.add(tpl)
+        await db.flush()
+
+        instance = OperatorInstance(
+            id=uuid.uuid4(),
+            organization_id=ws.id,
+            template_id=tpl.id,
+            name="Harness Instance",
+            webhook_token=uuid.uuid4(),
+            model="gemini-2.5-flash",
+            status="active",
+        )
+        db.add(instance)
+        await db.flush()
+        iid = str(instance.id)
+        print(f"OperatorInstance {iid} created")
+
+        await ingest(
+            SAMPLE_TXT.encode("utf-8"),
+            "catalogo_ecoparts.txt",
+            instance_id=iid,
+            db=db,
+            workspace_id=wid,
+        )
         print("Ingested catalog document")
 
         queries = [
@@ -63,10 +96,13 @@ async def run():
         ]
 
         for query, expected in queries:
-            results = await query_brain(query, wid, db)
+            results = await query_brain(
+                query, iid, db, fallback_workspace_id=wid,
+            )
             ok = any(expected.lower() in r.lower() for r in results)
             status = "PASS" if ok else "FAIL"
-            print(f"{status}  Q: \"{query}\" → {results[0][:80] if results else 'NO RESULT'}...")
+            preview = results[0][:80] if results else "NO RESULT"
+            print(f'{status}  Q: "{query}" → {preview}...')
 
         await db.commit()
     print("\nALL AI HARNESS TESTS PASSED")

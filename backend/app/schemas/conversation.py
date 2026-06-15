@@ -20,6 +20,8 @@ class ConversationOut(BaseModel):
     lead_name: str | None
     channel: str
     bot_active: bool = True
+    sentiment: float = 0.0
+    sentiment_label: str = "neutral"
     last_message: str | None
     last_message_at: datetime | None
     message_count: int

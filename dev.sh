@@ -38,6 +38,11 @@ echo "[4/5] Poblando datos de prueba..."
 docker compose run --rm -e PYTHONPATH=/app backend python seed_data.py
 echo "[✓] Datos de prueba listos."
 
+# ── 5.5. Operator seed ─────────────────────────
+echo "[4.5/5] Poblando templates de operadores..."
+docker compose run --rm -e PYTHONPATH=/app backend python seed_operators.py
+echo "[✓] Templates de operadores listos."
+
 # ── 6. Frontend ────────────────────────────────
 echo "[5/5] Iniciando frontend..."
 if [ ! -d "frontend/node_modules" ]; then

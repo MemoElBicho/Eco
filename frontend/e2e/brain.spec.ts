@@ -1,0 +1,21 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Eco Brain', () => {
+  test('upload document and verify listing', async ({ page }) => {
+    await page.goto('/brain');
+    await expect(page.getByText('Upload Document')).toBeVisible();
+
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'knowledge.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('Eco knowledge base test content for E2E.'),
+    });
+
+    await page.getByRole('button', { name: 'Upload' }).click();
+
+    await expect(page.locator('text=Processing...')).toBeVisible();
+    await expect(page.locator('text=Processing...')).not.toBeVisible({ timeout: 15000 });
+
+    await expect(page.getByText('knowledge.txt')).toBeVisible({ timeout: 10000 });
+  });
+});

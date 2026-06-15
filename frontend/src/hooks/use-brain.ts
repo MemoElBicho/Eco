@@ -1,16 +1,22 @@
+"use client"
+
 import { useCallback, useEffect, useState } from "react"
 import { api, BrainDoc } from "@/lib/api"
+import { useActiveInstance } from "@/hooks/use-active-instance"
 
 export function useBrain() {
+  const { instanceId } = useActiveInstance()
   const [docs, setDocs] = useState<BrainDoc[]>([])
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(async () => {
     setLoading(true)
-    try { setDocs(await api.brain.documents()) }
-    catch {}
+    try {
+      const params = instanceId ? { operator_instance_id: instanceId } : undefined
+      setDocs(await api.brain.documents(params))
+    } catch {}
     finally { setLoading(false) }
-  }, [])
+  }, [instanceId])
 
   useEffect(() => { refresh() }, [refresh])
 

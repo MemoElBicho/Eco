@@ -10,6 +10,7 @@ from app.api.deps import get_db
 from app.api.v1.auth import get_current_user
 from app.models.brain_document import BrainDocument
 from app.models.user import User
+from app.services.limits import check_free_plan_limits
 
 router = APIRouter(prefix="/brain")
 
@@ -35,6 +36,7 @@ async def list_docs(user: User = Depends(get_current_user), db: AsyncSession = D
 
 @router.post("/upload")
 async def upload_doc(file: UploadFile, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await check_free_plan_limits(db, user.workspace_id, "brain_docs")
     content = await file.read()
     text = content.decode("utf-8", errors="replace")
     chunk_size = 1000

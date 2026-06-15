@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/v1/(.*)",
+      "destination": "https://api.midominio.com/api/v1/$1"
+    }
+  ]
+}

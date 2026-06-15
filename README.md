@@ -1,6 +1,6 @@
-# Eco — Plataforma SaaS Multi-tenant de Automatización de Ventas con IA
+# Eco — Plataforma Self-Hosted de Automatización Conversacional con IA
 
-Mensajería automatizada por IA + Live Chat Hub con intervención humana en tiempo real. Eco conecta WhatsApp y Telegram a un agente de IA con RAG (Generación Aumentada por Recuperación), permitiendo a equipos de ventas gestionar conversaciones desde un dashboard unificado.
+Asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos internos, organiza tus clientes automáticamente y sincroniza con HubSpot. Corre en tu propio servidor.
 
 ---
 
@@ -10,31 +10,36 @@ Mensajería automatizada por IA + Live Chat Hub con intervención humana en tiem
 [WhatsApp / Telegram]
         │
         ▼
-[ngrok / Tunel Público]
+[ngrok / Túnel Público]
         │
         ▼
-[FastAPI Webhook] ──────────────────────────────────────┐
-        │                                                │
-        ▼                                                ▼
-[Celery Worker] ──► [pgvector / RAG]              [WebSocket Manager]
-        │               │                                │
-        │               ▼                                │
-        │        [Gemini Embedding]                      │
-        │               │                                │
-        ▼               ▼                                ▼
-[Gemini 2.5 Flash]  [WorkspaceConfig DB]         [Next.js Dashboard]
-        │                                                ▲
-        ▼                                                │
-[HTTPX Sender] ──► WhatsApp/Telegram ────────────────────┘
+[FastAPI Webhook] ───────────────────────────────────────┐
+        │                                                 │
+        ▼                                                 ▼
+[Celery Worker] ──► [pgvector / RAG]               [WebSocket Manager]
+        │               │                                 │
+        │               ▼                                 │
+        │        [Gemini Embedding]                       │
+        │               │                                 │
+        ▼               ▼                                 ▼
+[Gemini 2.5 Flash]  [WorkspaceConfig DB]          [Next.js Dashboard]
+        │                                                 ▲
+        ▼                                                 │
+[HTTPX Sender] ──► WhatsApp/Telegram ─────────────────────┘
+        │
+        ├──► [HubSpot CRM] (sync bidireccional de contactos)
+        └──► [Stripe] (checkout, billing portal, webhooks)
 ```
 
-1. **Webhook público** — FastAPI recibe el mensaje entrante (WhatsApp/Telegram) vía ngrok
-2. **Tarea asíncrona** — Celery encola `process_message` con el payload. Si la API de IA falla (503), reintenta hasta 3 veces con backoff exponencial
-3. **Búsqueda vectorial** — `query_brain` consulta pgvector con `cosine_distance` usando embeddings de `gemini-embedding-001` (3072 dimensiones)
-4. **RAG con Gemini** — `agent.py` combina el contexto del catálogo con el mensaje del cliente y genera la respuesta con Gemini 2.5 Flash
-5. **Despacho dinámico** — `telegram_client.py` / `whatsapp_client.py` leen el token desde `WorkspaceConfig` de la DB (por workspace) y envían vía HTTPX; fallback al `.env` si no está configurado
-6. **Notificación en tiempo real** — `WebSocket Manager` transmite cada mensaje entrante y saliente al dashboard Next.js sin recargar la página
-7. **Live Chat Hub** — El frontend recibe los mensajes vía WebSocket; el agente humano puede pausar el bot, enviar respuestas manuales y reactivar la IA
+1. **Webhook público** — FastAPI recibe el mensaje entrante vía ngrok
+2. **Tarea asíncrona** — Celery encola `process_message`. Si la API de IA falla, reintenta hasta 3 veces con backoff exponencial
+3. **Búsqueda vectorial** — `query_brain` consulta pgvector con `cosine_distance` usando embeddings Gemini (3072d)
+4. **RAG con Gemini** — `agent.py` combina contexto del Brain con el mensaje y genera respuesta con Gemini 2.5 Flash
+5. **Despacho dinámico** — `telegram_client.py` / `whatsapp_client.py` leen tokens desde `WorkspaceConfig` por workspace
+6. **Tiempo real** — `WebSocket Manager` transmite cada mensaje al dashboard Next.js sin recargar
+7. **Live Chat Hub** — El humano pausa el bot, envía respuestas manuales y reactiva la IA
+8. **HubSpot Sync** — Sincronización bidireccional de contactos (Eco → HubSpot y HubSpot → Eco vía webhooks)
+9. **Stripe Billing** — Planes Free/Pro/Enterprise con checkout, portal de facturación y webhooks de pago
 
 ---
 
@@ -47,7 +52,11 @@ Mensajería automatizada por IA + Live Chat Hub con intervención humana en tiem
 | **WebSockets bidireccionales** | `ConnectionManager` en FastAPI agrupa conexiones por `workspace_id`. Cada mensaje nuevo (`in` u `out`) se transmite instantáneamente al frontend. |
 | **Resiliencia ante fallos** | Celery `autoretry_for=(OpenAIError,)` con `retry_backoff=True` y `max_retries=3`. Si Gemini devuelve 503, el worker reintenta sin crashear. |
 | **pgvector + RAG** | Documentos PDF/TXT se chunked, se generan embeddings con Gemini, se almacenan en PostgreSQL y se recuperan por similitud coseno. |
-| **Dashboard shadcn/ui** | Next.js 16 + Tailwind CSS + shadcn/ui. Sidebar con Leads (tabla + CRUD), Brain (drag & drop + upload), Live Chat Hub (split layout + WebSockets), Settings (formulario de API keys). |
+| **Dashboard shadcn/ui** | Next.js 16 + Tailwind CSS + shadcn/ui. Sidebar con Leads (CRUD + HubSpot badge), Brain (upload + lista), Live Chat Hub (split layout + WebSocket), Settings (API keys + HubSpot + Facturación). |
+| **CRM + HubSpot Sync** | Leads con `hs_contact_id` y `hs_last_sync`. Webhook inbound de HubSpot con resolución de conflictos por timestamp. Celery task outbound para crear/actualizar contactos. |
+| **Suscripciones Stripe** | Planes Free/Pro/Enterprise. Checkout, Billing Portal y webhook `checkout.session.completed`. Límites Free Plan (50 msgs/mes). |
+| **Análisis de Sentimiento** | Gemini clasifica cada mensaje (positivo/neutro/negativo) con score -1.0 a 1.0. Visible en dashboard. |
+| **Tests + CI/CD** | pytest con fixtures async, db_session con rollback por test. Playwright E2E (auth, leads, brain, conversations, webhooks). GitHub Actions con PostgreSQL + Redis. |
 
 ---
 
@@ -78,6 +87,18 @@ Este script se encarga de **todo**:
 7. Inicia el frontend en `http://localhost:3000`
 
 Al terminar, abre el navegador, regístrate en `/register` y explora el dashboard.
+
+### Apagar todo
+
+```bash
+# Windows
+stop.bat
+
+# Linux / Mac
+chmod +x stop.sh && ./stop.sh
+```
+
+Los datos en PostgreSQL y Redis se conservan. Para volver a iniciar, ejecutá `dev.bat` o `dev.sh` de nuevo.
 
 ### Opción B: Paso a paso
 
@@ -133,15 +154,17 @@ ngrok http 8000
 Eco/
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/           # Routers FastAPI (auth, brain, leads, conversations, settings, webhooks)
+│   │   ├── api/v1/           # Routers FastAPI (auth, brain, leads, conversations, settings, billing, webhooks/)
+│   │   │   └── webhooks/      # telegram, whatsapp, stripe, hubspot
 │   │   ├── core/              # WebSocket ConnectionManager
 │   │   ├── models/            # SQLAlchemy (User, Workspace, Lead, Message, BrainDocument, WorkspaceConfig)
 │   │   ├── schemas/           # Pydantic (request/response)
-│   │   ├── services/          # agent.py, brain.py, telegram_client.py, whatsapp_client.py
-│   │   ├── tasks/             # celery_app.py, ai_tasks.py
+│   │   ├── services/          # agent.py, brain.py, sentiment.py, hubspot_client.py, telegram_client.py, whatsapp_client.py, limits.py
+│   │   ├── tasks/             # celery_app.py, ai_tasks.py, hubspot_tasks.py
 │   │   ├── config.py          # pydantic-settings
 │   │   └── database.py        # SQLAlchemy async engine
 │   ├── alembic/               # Migraciones
+│   ├── tests/                  # pytest (auth, leads, brain, conversations, settings, sentiment, billing, webhooks)
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
@@ -150,11 +173,18 @@ Eco/
 │   │   ├── components/        # shadcn/ui + componentes de negocio (chat-list, chat-window, message-bubble)
 │   │   ├── hooks/             # useLeads, useBrain, useConversations, useWebSocket, useAuth
 │   │   └── lib/               # api.ts (fetch wrapper), types
+│   ├── e2e/                   # Playwright E2E (auth, leads, brain, conversations)
+│   ├── playwright.config.ts
 │   └── package.json
+├── .github/workflows/          # GitHub Actions CI (test.yml)
 ├── docker-compose.yml
 ├── .env.example
-├── dev.bat                  # Inicio rápido Windows
-└── dev.sh                   # Inicio rápido Linux/Mac
+├── dev.bat                     # Inicio rápido Windows
+├── dev.sh                      # Inicio rápido Linux/Mac
+├── stop.bat                    # Apagar todo Windows
+├── stop.sh                     # Apagar todo Linux/Mac
+├── ECO_FLOW.html               # Diagrama interactivo de flujo completo
+└── INVESTORS.md                # Documento para inversores
 ```
 
 ---
@@ -165,13 +195,38 @@ Eco/
 |---|---|
 | **Backend** | FastAPI (Python 3.11), SQLAlchemy 2.0 async, Pydantic v2 |
 | **Base de datos** | PostgreSQL 16 + pgvector |
-| **Cola de tareas** | Celery con Redis broker, `--pool=solo` |
-| **IA / Embeddings** | Gemini 2.5 Flash (chat), gemini-embedding-001 (vectores 3072d) |
+| **Cola de tareas** | Celery con Redis broker |
+| **IA / Embeddings** | Gemini 2.5 Flash (chat), gemini-embedding-001 (3072d) |
 | **Mensajería** | Telegram Bot API, Meta WhatsApp Cloud API v21.0 |
+| **CRM Externo** | HubSpot API v3 (sync bidireccional) |
+| **Pagos** | Stripe Checkout + Billing Portal + Webhooks |
 | **Frontend** | Next.js 16 (App Router), Tailwind CSS v4, shadcn/ui |
 | **Tiempo real** | FastAPI WebSockets |
+| **Tests** | pytest + pytest-asyncio, Playwright E2E |
+| **CI/CD** | GitHub Actions (postgres + redis services) |
 | **Infraestructura** | Docker Compose, ngrok |
 | **Auth** | JWT + bcrypt |
+
+---
+
+## 🧪 Tests
+
+```bash
+# Backend (requiere PostgreSQL + Redis)
+cd backend
+pytest -v
+
+# E2E (requiere backend corriendo en :8000)
+cd frontend
+npx playwright test
+```
+
+---
+
+## 📄 Documentos Relacionados
+
+- **`INVESTORS.md`** — Pitch para inversores: qué es Eco, modelo de negocio, roadmap, competencia
+- **`ECO_FLOW.html`** — Diagrama interactivo React Flow con el flujo completo de uso paso a paso
 
 ---
 

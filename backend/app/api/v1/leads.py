@@ -10,6 +10,8 @@ from app.api.v1.auth import get_current_user
 from app.models.lead import Lead
 from app.models.user import User
 from app.schemas.lead import LeadCreate, LeadOut, LeadUpdate
+from app.services.limits import check_free_plan_limits
+from app.tasks.hubspot_tasks import sync_lead_to_hubspot_task
 
 router = APIRouter(prefix="/leads")
 
@@ -20,6 +22,7 @@ def _to_out(l: Lead) -> LeadOut:
         name=l.name, phone=l.phone, email=l.email,
         channel=l.channel, channel_user_id=l.channel_user_id,
         status=l.status, notes=l.notes,
+        hs_contact_id=l.hs_contact_id, hs_last_sync=l.hs_last_sync,
         created_at=l.created_at, updated_at=l.updated_at,
     )
 
@@ -46,10 +49,12 @@ async def create_lead(
     db: AsyncSession = Depends(get_db),
 ):
     try:
+        await check_free_plan_limits(db, user.workspace_id, "leads")
         lead = Lead(workspace_id=user.workspace_id, **body.model_dump())
         db.add(lead)
         await db.commit()
         await db.refresh(lead)
+        sync_lead_to_hubspot_task.delay(str(lead.id), str(user.workspace_id))
         return _to_out(lead)
     except Exception as e:
         print(f"Error in POST /leads: {e}")
@@ -94,9 +99,10 @@ async def update_lead(
             raise HTTPException(status_code=404, detail="Lead not found")
         for field, value in body.model_dump(exclude_unset=True).items():
             setattr(lead, field, value)
-        lead.updated_at = datetime.now(timezone.utc)
+        lead.updated_at = datetime.utcnow()
         await db.commit()
         await db.refresh(lead)
+        sync_lead_to_hubspot_task.delay(str(lead.id), str(user.workspace_id))
         return _to_out(lead)
     except HTTPException:
         raise

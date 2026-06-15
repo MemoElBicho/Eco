@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-eco_db}
+      POSTGRES_USER: ${POSTGRES_USER:-eco}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eco_secret}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eco} -d ${POSTGRES_DB:-eco_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eco-network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eco-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env.production
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks:
+      - eco-network
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    env_file: .env.production
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks:
+      - eco-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - eco-network
+
+volumes:
+  pgdata:
+
+networks:
+  eco-network:
+    driver: bridge

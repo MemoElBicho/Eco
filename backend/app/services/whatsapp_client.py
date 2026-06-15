@@ -1,30 +1,53 @@
+import json
+import uuid
+
 import httpx
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.models.workspace_config import WorkspaceConfig
+from app.models.operator_channel import OperatorChannel
 
 
-async def send_message(session, workspace_id: str, to: str, text: str):
-    result = await session.execute(
-        select(WorkspaceConfig).where(WorkspaceConfig.workspace_id == workspace_id)
+async def send_whatsapp_message(
+    to_phone: str,
+    text: str,
+    operator_instance_id: str,
+    db: AsyncSession,
+) -> bool:
+    iid = uuid.UUID(operator_instance_id)
+    result = await db.execute(
+        select(OperatorChannel).where(
+            OperatorChannel.operator_instance_id == iid,
+            OperatorChannel.channel == "whatsapp",
+            OperatorChannel.is_active == True,
+        )
     )
-    cfg = result.scalars().first()
+    channel = result.scalars().first()
+    if not channel or not channel.external_id:
+        return False
 
-    token = cfg.whatsapp_access_token if cfg and cfg.whatsapp_access_token else settings.whatsapp_access_token
-    phone_id = cfg.whatsapp_phone_number_id if cfg and cfg.whatsapp_phone_number_id else settings.whatsapp_phone_number_id
+    try:
+        creds = json.loads(channel.external_id)
+        access_token = creds.get("access_token", "")
+        phone_number_id = creds.get("phone_number_id", "")
+    except (json.JSONDecodeError, TypeError):
+        return False
 
-    if not token or token.startswith("your_"):
-        base = settings.mock_whatsapp_url
-        headers = {}
-    else:
-        base = f"{settings.whatsapp_base_url}/{settings.whatsapp_api_version}/{phone_id}"
-        headers = {"Authorization": f"Bearer {token}"}
+    if not access_token or access_token.startswith("your_"):
+        print(f"[MOCK WhatsApp] → {to_phone}: {text[:80]}...")
+        return True
 
-    payload = {"messaging_product": "whatsapp", "to": to, "type": "text", "text": {"body": text}}
+    headers = {"Authorization": f"Bearer {access_token}"}
+    base_url = f"https://graph.facebook.com/v17.0/{phone_number_id}"
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to_phone,
+        "type": "text",
+        "text": {"body": text},
+    }
 
     async with httpx.AsyncClient() as client:
-        resp = await client.post(f"{base}/messages", json=payload, headers=headers)
-        data = resp.json() if resp.status_code < 300 else resp.text
-        print(f"[WhatsApp] sent to {to}: {resp.status_code}")
-        return data
+        resp = await client.post(
+            f"{base_url}/messages", json=payload, headers=headers
+        )
+        return resp.status_code < 300

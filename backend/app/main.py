@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1.router import router
+import app.services.tools  # noqa: F401 - register tool classes in ToolRegistry
 
 
 @asynccontextmanager

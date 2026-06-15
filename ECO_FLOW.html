@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco — Diagrama de Flujo Completo</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/reactflow@11.11.4/dist/umd/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/reactflow@11.11.4/dist/style.css">
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;overflow:hidden}
+  #root{width:100vw;height:100vh}
+  .react-flow__node{font-size:12px;border-radius:12px;padding:12px 16px;border:2px solid;min-width:180px;text-align:center}
+  .react-flow__node-group{background:rgba(30,41,59,0.9);border:2px dashed #334155;border-radius:16px;padding:20px}
+  .node-step{background:#1e293b;border-color:#3b82f6}
+  .node-action{background:#1e293b;border-color:#22c55e}
+  .node-tech{background:#1e293b;border-color:#a855f7}
+  .node-result{background:#1e293b;border-color:#f59e0b}
+  .node-external{background:#1e293b;border-color:#ef4444}
+  .node-title{font-weight:700;font-size:13px;margin-bottom:4px}
+  .node-desc{font-size:10px;color:#94a3b8;line-height:1.4}
+  .node-icon{font-size:20px;margin-bottom:4px}
+  .react-flow__edge-path{stroke:#475569;stroke-width:2}
+  .react-flow__edge-text{font-size:10px;fill:#94a3b8}
+  .react-flow__controls button{background:#1e293b;border:1px solid #334155;color:#e2e8f0}
+  .react-flow__minimap{background:#0f172a;border:1px solid #334155}
+  .legend{position:fixed;bottom:16px;left:16px;background:#1e293bcc;backdrop-filter:blur(12px);border-radius:12px;padding:12px 16px;display:flex;gap:16px;font-size:11px;z-index:10}
+  .legend-item{display:flex;align-items:center;gap:6px}
+  .legend-dot{width:12px;height:12px;border-radius:4px}
+  h2{position:fixed;top:16px;left:50%;transform:translateX(-50%);font-size:16px;font-weight:700;z-index:10;background:#1e293bcc;backdrop-filter:blur(12px);padding:8px 24px;border-radius:999px}
+</style>
+</head>
+<body>
+<h2>🧠 Eco — Aprende a Usarlo Paso a Paso</h2>
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>Tu acción</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span>Configuración</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#a855f7"></span>Procesamiento</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Resultado</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Externo</div>
+</div>
+<div id="root"></div>
+<script type="text/babel">
+const { useCallback, useMemo } = React;
+const { ReactFlow, Background, Controls, MiniMap, Handle, Position, useNodesState, useEdgesState } = window.ReactFlow;
+
+const styleStep = { background: "#1e293b", borderColor: "#3b82f6", color: "#e2e8f0" };
+const styleAction = { background: "#1e293b", borderColor: "#22c55e", color: "#e2e8f0" };
+const styleTech = { background: "#1e293b", borderColor: "#a855f7", color: "#e2e8f0" };
+const styleResult = { background: "#1e293b", borderColor: "#f59e0b", color: "#e2e8f0" };
+const styleExternal = { background: "#1e293b", borderColor: "#ef4444", color: "#e2e8f0" };
+
+function N({ data }) {
+  return React.createElement("div", { className: `react-flow__node node-${data.type || "step"}` },
+    React.createElement(Handle, { type: "target", position: Position.Top }),
+    data.icon && React.createElement("div", { className: "node-icon" }, data.icon),
+    React.createElement("div", { className: "node-title" }, data.label),
+    data.desc && React.createElement("div", { className: "node-desc" }, data.desc),
+    React.createElement(Handle, { type: "source", position: Position.Bottom })
+  );
+}
+
+const nodes = [
+  // === FASE 0: ONBOARDING ===
+  { id:"s1", type:"node", position:{x:250,y:0},   data:{icon:"🚀",label:"FASE 0: Primer Acceso",desc:"Abre http://localhost:3000\nEjecuta dev.bat o dev.sh",type:"step"},style:styleStep},
+  { id:"s2", type:"node", position:{x:250,y:110},  data:{icon:"📝",label:"Registrarte",desc:"Crea tu cuenta con email\ny contraseña en /register",type:"action"},style:styleAction},
+  { id:"s3", type:"node", position:{x:250,y:220},  data:{icon:"🔑",label:"Iniciar Sesión",desc:"Login en /login\nToken JWT guardado",type:"action"},style:styleAction},
+
+  // === FASE 1: CONFIGURAR WORKSPACE ===
+  { id:"c1", type:"node", position:{x:520,y:0},    data:{icon:"⚙️",label:"FASE 1: Configurar Workspace",desc:"Ve a /settings",type:"step"},style:styleStep},
+  { id:"c2", type:"node", position:{x:520,y:110},  data:{icon:"🔌",label:"API Key de IA",desc:"Pega tu OpenAI/Gemini API Key\nPara que el bot genere respuestas",type:"action"},style:styleAction},
+  { id:"c3", type:"node", position:{x:520,y:220},  data:{icon:"🤖",label:"Token de Telegram",desc:"Crea un bot con @BotFather\nPega el token aquí",type:"action"},style:styleAction},
+  { id:"c4", type:"node", position:{x:520,y:330},  data:{icon:"💬",label:"Tokens de WhatsApp",desc:"Phone Number ID, Access Token\ny Verify Token desde Meta",type:"action"},style:styleAction},
+  { id:"c5", type:"node", position:{x:520,y:440},  data:{icon:"🔗",label:"HubSpot (Opcional)",desc:"Access Token + Portal ID\nSincroniza contactos",type:"action"},style:styleAction},
+
+  // === FASE 2: SUBIR CONOCIMIENTO ===
+  { id:"b1", type:"node", position:{x:790,y:0},    data:{icon:"🧠",label:"FASE 2: Eco Brain",desc:"Ve a /brain",type:"step"},style:styleStep},
+  { id:"b2", type:"node", position:{x:790,y:110},  data:{icon:"📄",label:"Subir Documentos",desc:"Arrastra PDFs o TXT con:\n• Catálogo de productos\n• Políticas de la empresa\n• FAQs frecuentes",type:"action"},style:styleAction},
+  { id:"b3", type:"node", position:{x:790,y:230},  data:{icon:"🔢",label:"Chunking + Embeddings",desc:"El sistema divide los docs\nen chunks y genera vectores\ncon Gemini Embedding (3072d)",type:"tech"},style:styleTech},
+  { id:"b4", type:"node", position:{x:790,y:350},  data:{icon:"🗄️",label:"pgvector indexado",desc:"PostgreSQL + pgvector almacena\nlos vectores para búsqueda\npor similitud coseno",type:"tech"},style:styleTech},
+
+  // === FASE 3: CANALES EN VIVO ===
+  { id:"ch1",type:"node", position:{x:1060,y:0},   data:{icon:"📡",label:"FASE 3: Activar Canales",desc:"Expón webhooks al exterior",type:"step"},style:styleStep},
+  { id:"ch2",type:"node", position:{x:1060,y:110}, data:{icon:"🔄",label:"ngrok / Túnel Público",desc:"ngrok http 8000\no servidor con HTTPS público",type:"action"},style:styleAction},
+  { id:"ch3",type:"node", position:{x:1060,y:220}, data:{icon:"✈️",label:"Registrar Webhook Telegram",desc:"POST setWebhook al Bot API\ncon URL de ngrok",type:"action"},style:styleAction},
+  { id:"ch4",type:"node", position:{x:1060,y:330}, data:{icon:"📲",label:"Configurar Webhook WhatsApp",desc:"En Meta Developer Dashboard\napunta a /webhooks/whatsapp",type:"action"},style:styleAction},
+
+  // === FASE 4: PRIMER MENSAJE ===
+  { id:"f1", type:"node", position:{x:250,y:380},  data:{icon:"💬",label:"FASE 4: Llega un Mensaje",desc:"Un cliente escribe por\nWhatsApp o Telegram",type:"step"},style:styleStep},
+  { id:"f2", type:"node", position:{x:250,y:490},  data:{icon:"📨",label:"Webhook Recibe",desc:"FastAPI recibe el POST\ny valida el payload",type:"tech"},style:styleTech},
+  { id:"f3", type:"node", position:{x:250,y:600},  data:{icon:"📋",label:"Encolar en Celery",desc:"process_message.delay()\ncon el payload del mensaje",type:"tech"},style:styleTech},
+  { id:"f4", type:"node", position:{x:0,y:710},    data:{icon:"👤",label:"Buscar/Crear Lead",desc:"Si es nuevo, crea un Lead\nen el CRM automáticamente\ncon nombre, canal, teléfono",type:"tech"},style:styleTech},
+  { id:"f5", type:"node", position:{x:250,y:710},  data:{icon:"🔍",label:"Consulta RAG",desc:"Busca en pgvector los chunks\nmás relevantes del Brain\nusando cosine_distance",type:"tech"},style:styleTech},
+  { id:"f6", type:"node", position:{x:520,y:600},  data:{icon:"🤖",label:"Generar Respuesta",desc:"Gemini 2.5 Flash recibe:\n• Contexto (chunks del Brain)\n• Mensaje del cliente\n→ Genera respuesta precisa",type:"tech"},style:styleTech},
+  { id:"f7", type:"node", position:{x:520,y:720},  data:{icon:"📤",label:"Enviar al Cliente",desc:"HTTPX envía la respuesta\npor el mismo canal\n(WhatsApp o Telegram)",type:"tech"},style:styleTech},
+  { id:"f8", type:"node", position:{x:800,y:720},  data:{icon:"📊",label:"Dashboard se Actualiza",desc:"WebSocket transmite el mensaje\nen tiempo real al frontend\nsin recargar la página",type:"result"},style:styleResult},
+
+  // === FASE 5: DASHBOARD LIVE CHAT ===
+  { id:"d1", type:"node", position:{x:790,y:500},  data:{icon:"💻",label:"FASE 5: Live Chat Hub",desc:"Ve a /conversations\nPanel izquierdo: chats activos\nPanel derecho: conversación",type:"step"},style:styleStep},
+  { id:"d2", type:"node", position:{x:1060,y:500}, data:{icon:"👁️",label:"Ver Conversación",desc:"Selecciona un chat.\nVes todos los mensajes\nentrantes y salientes.",type:"result"},style:styleResult},
+  { id:"d3", type:"node", position:{x:1060,y:620}, data:{icon:"✍️",label:"Responder Manualmente",desc:"Escribe en el input y Enter.\nEl bot se PAUSA automáticamente.\nTú tomas el control.",type:"action"},style:styleAction},
+  { id:"d4", type:"node", position:{x:1060,y:740}, data:{icon:"▶️",label:"Reactivar Bot",desc:"Clic en 'Resume AI'.\nLa IA vuelve a responder\nautomáticamente.",type:"action"},style:styleAction},
+
+  // === FASE 6: CRM LEADS ===
+  { id:"l1", type:"node", position:{x:250,y:860},  data:{icon:"📋",label:"FASE 6: CRM Leads",desc:"Ve a /leads\nTabla con todos los contactos\nque han interactuado",type:"step"},style:styleStep},
+  { id:"l2", type:"node", position:{x:0,y:1000},   data:{icon:"➕",label:"Crear Lead Manual",desc:"'Add Lead' → llenar formulario\nNombre, Canal, User ID",type:"action"},style:styleAction},
+  { id:"l3", type:"node", position:{x:250,y:1000}, data:{icon:"📊",label:"Ver Detalles del Lead",desc:"Nombre, teléfono, email,\ncanal, estado, sentimiento,\nfecha de creación",type:"result"},style:styleResult},
+  { id:"l4", type:"node", position:{x:500,y:1000}, data:{icon:"🔗",label:"Sincronización HubSpot",desc:"Si configuraste HubSpot:\n• Lead → Contacto en HubSpot\n• Cambios en HubSpot → Lead\n• Última sincronización visible",type:"result"},style:styleResult},
+  { id:"l5", type:"node", position:{x:750,y:1000}, data:{icon:"🗑️",label:"Eliminar Lead",desc:"Botón de basura en la tabla.\nSe borra del CRM.",type:"action"},style:styleAction},
+
+  // === FASE 7: MONETIZACIÓN ===
+  { id:"p1", type:"node", position:{x:1060,y:880}, data:{icon:"💳",label:"FASE 7: Planes",desc:"Ve a /settings → Facturación\nPlan Free, Pro ($49/mes)\no Enterprise ($199/mes)",type:"step"},style:styleStep},
+  { id:"p2", type:"node", position:{x:1060,y:1000},data:{icon:"🛒",label:"Stripe Checkout",desc:"Clic en 'Upgrade'\nRedirige a Stripe Checkout\nPago seguro con tarjeta",type:"external"},style:styleExternal},
+  { id:"p3", type:"node", position:{x:1060,y:1120},data:{icon:"🔄",label:"Webhook de Stripe",desc:"Stripe notifica pago exitoso\n→ Plan se activa en DB\n→ Acceso a features Pro",type:"tech"},style:styleTech},
+
+  // === ARQUITECTURA INTERNA ===
+  { id:"ar1",type:"node", position:{x:-280,y:380}, data:{icon:"🏗️",label:"FastAPI Backend",desc:"Python 3.11 + Async\nRouters, WebSockets, JWT Auth\nhealth check en /health",type:"tech"},style:styleTech},
+  { id:"ar2",type:"node", position:{x:-280,y:500}, data:{icon:"🐘",label:"PostgreSQL + pgvector",desc:"Base de datos principal\nTablas: users, workspaces,\nleads, messages, brain_docs,\nworkspace_configs, subscriptions",type:"tech"},style:styleTech},
+  { id:"ar3",type:"node", position:{x:-280,y:620}, data:{icon:"🔴",label:"Redis + Celery",desc:"Cola de tareas asíncrona\nReintentos automáticos\nBackoff exponencial",type:"tech"},style:styleTech},
+  { id:"ar4",type:"node", position:{x:-280,y:740}, data:{icon:"🧪",label:"Tests Automatizados",desc:"pytest (backend)\nPlaywright E2E (frontend)\nCI/CD con GitHub Actions",type:"tech"},style:styleTech},
+  { id:"ar5",type:"node", position:{x:-280,y:860}, data:{icon:"🐋",label:"Docker Compose",desc:"Levanta todo con 1 comando:\nPostgreSQL + Redis + Backend\n+ Celery Worker + Frontend",type:"tech"},style:styleTech},
+
+  // HUBSPOT FLOW
+  { id:"hs1",type:"node", position:{x:0,y:550},    data:{icon:"🟠",label:"Webhook de HubSpot",desc:"POST /webhooks/hubspot\ncontact.creation y\ncontact.propertyChange",type:"external"},style:styleExternal},
+  { id:"hs2",type:"node", position:{x:0,y:670},    data:{icon:"⏱️",label:"Resolución de Conflictos",desc:"Si occurredAt > hs_last_sync\n→ HubSpot gana, actualiza lead\nSi no → Eco gana, ignora evento",type:"tech"},style:styleTech},
+];
+
+const edges = [
+  // FASE 0
+  {id:"e0-1",source:"s1",target:"s2",label:"Paso 1"},
+  {id:"e0-2",source:"s2",target:"s3",label:"Paso 2"},
+  {id:"e0-3",source:"s3",target:"c1",label:"→ Dashboard"},
+
+  // FASE 1
+  {id:"e1-1",source:"c1",target:"c2",label:"1º"},
+  {id:"e1-2",source:"c2",target:"c3",label:"2º"},
+  {id:"e1-3",source:"c3",target:"c4",label:"3º"},
+  {id:"e1-4",source:"c4",target:"c5",label:"4º (opcional)"},
+  {id:"e1-5",source:"c5",target:"b1",label:"→ Siguiente"},
+
+  // FASE 2
+  {id:"e2-1",source:"b1",target:"b2",label:"Arrastra PDFs"},
+  {id:"e2-2",source:"b2",target:"b3",label:"Procesa"},
+  {id:"e2-3",source:"b3",target:"b4",label:"Indexa"},
+  {id:"e2-4",source:"b4",target:"ch1",label:"→ Siguiente"},
+
+  // FASE 3
+  {id:"e3-1",source:"ch1",target:"ch2",label:"1º"},
+  {id:"e3-2",source:"ch2",target:"ch3",label:"2º Telegram"},
+  {id:"e3-3",source:"ch2",target:"ch4",label:"2º WhatsApp"},
+
+  // FASE 4: FLUJO DE MENSAJE
+  {id:"e4-0",source:"ch4",target:"f1",label:"Cliente escribe →",style:{strokeWidth:3,stroke:"#22c55e"}},
+  {id:"e4-1",source:"f1",target:"f2",label:"llega"},
+  {id:"e4-2",source:"f2",target:"f3",label:"encola"},
+  {id:"e4-3",source:"f3",target:"f4",label:"crea/actualiza lead"},
+  {id:"e4-4",source:"f3",target:"f5",label:"busca contexto"},
+  {id:"e4-5",source:"f4",target:"f5"},
+  {id:"e4-6",source:"f5",target:"f6",label:"contexto + mensaje"},
+  {id:"e4-7",source:"f6",target:"f7",label:"respuesta generada"},
+  {id:"e4-8",source:"f7",target:"f8",label:"WebSocket broadcast"},
+  {id:"e4-9",source:"f7",target:"f1",label:"envía respuesta al cliente",animated:true,style:{strokeWidth:3,stroke:"#22c55e"}},
+
+  // FASE 5
+  {id:"e5-1",source:"f8",target:"d1",label:"→ /conversations"},
+  {id:"e5-2",source:"d1",target:"d2",label:"Selecciona chat"},
+  {id:"e5-3",source:"d2",target:"d3",label:"Tomas el control"},
+  {id:"e5-4",source:"d3",target:"d4",label:"Reactivar IA"},
+
+  // FASE 6
+  {id:"e6-1",source:"f4",target:"l1",label:"Leads creados →"},
+  {id:"e6-2",source:"l1",target:"l2",label:"Manual"},
+  {id:"e6-3",source:"l1",target:"l3",label:"Automático"},
+  {id:"e6-4",source:"l3",target:"l4",label:"sincroniza con"},
+  {id:"e6-5",source:"l1",target:"l5",label:"Eliminar"},
+
+  // FASE 7
+  {id:"e7-1",source:"l1",target:"p1",label:"→ Planes"},
+  {id:"e7-2",source:"p1",target:"p2",label:"Upgrade"},
+  {id:"e7-3",source:"p2",target:"p3",label:"Webhook"},
+
+  // Backend → flows
+  {id:"ea-1",source:"ar1",target:"f2",style:{strokeDasharray:"5 5"}},
+  {id:"ea-2",source:"ar1",target:"f7",style:{strokeDasharray:"5 5"}},
+  {id:"ea-3",source:"ar1",target:"f8",style:{strokeDasharray:"5 5"}},
+  {id:"ea-4",source:"ar3",target:"f3",style:{strokeDasharray:"5 5"}},
+  {id:"ea-5",source:"ar2",target:"f4",style:{strokeDasharray:"5 5"}},
+  {id:"ea-6",source:"ar2",target:"b4",style:{strokeDasharray:"5 5"}},
+  {id:"ea-7",source:"ar5",target:"ar1",style:{strokeDasharray:"5 5"}},
+  {id:"ea-8",source:"ar4",target:"ar1",style:{strokeDasharray:"5 5"}},
+
+  // HubSpot
+  {id:"eh-1",source:"l4",target:"hs1",label:"recibe cambios",style:{strokeDasharray:"3 3"}},
+  {id:"eh-2",source:"hs1",target:"hs2",label:"resuelve conflicto"},
+  {id:"eh-3",source:"hs2",target:"l3",label:"actualiza lead",style:{strokeDasharray:"3 3"}},
+
+  // Channels → messages
+  {id:"ec-1",source:"ch3",target:"f1",style:{strokeDasharray:"5 5"}},
+];
+
+const nodeTypes = { node: N };
+
+const initialNodes = nodes.map(n => {
+  if (n.id === "f1") return { ...n, style: { ...n.style, boxShadow: "0 0 24px rgba(34,197,94,0.5)" } };
+  if (n.id === "f7") return { ...n, style: { ...n.style, boxShadow: "0 0 24px rgba(168,85,247,0.4)" } };
+  return n;
+});
+
+function App() {
+  const [ns, setNs, onNodesChange] = useNodesState(initialNodes);
+  const [es, setEs, onEdgesChange] = useEdgesState(edges);
+
+  return React.createElement(ReactFlow, {
+    nodes: ns, edges: es,
+    onNodesChange, onEdgesChange,
+    nodeTypes,
+    fitView: true,
+    fitViewOptions: { padding: 0.3 },
+    defaultEdgeOptions: { animated: false },
+    style: { background: "#0f172a" },
+    children: [
+      React.createElement(Background, { color: "#1e293b", gap: 20 }),
+      React.createElement(Controls, null),
+      React.createElement(MiniMap, { nodeColor: n => n.style?.borderColor || "#475569", maskColor: "rgba(0,0,0,0.7)" }),
+    ]
+  });
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>

@@ -38,17 +38,24 @@ echo [✓] PostgreSQL listo.
 
 :: ── 4. Migraciones ────────────────────────────
 echo [3/5] Ejecutando migraciones de Alembic...
-docker compose run --rm -e PYTHONPATH=/app backend alembic upgrade head 2>&1 | findstr /c:"Running upgrade" /c:"already up to date" /c:"ERROR"
+docker compose run --rm -e PYTHONPATH=/app backend alembic upgrade head
 if %errorlevel% equ 0 (
     echo [✓] Migraciones aplicadas.
 ) else (
-    echo [!] Verifica las migraciones manualmente: docker compose run --rm -e PYTHONPATH=/app backend alembic upgrade head
+    echo [✗] Error en migraciones. Revisa el output arriba.
+    pause
+    exit /b 1
 )
 
 :: ── 5. Seed data ──────────────────────────────
 echo [4/5] Poblando datos de prueba...
 docker compose run --rm -e PYTHONPATH=/app backend python seed_data.py 2>&1 | findstr /c:"Done" /c:"Using workspace"
 echo [✓] Datos de prueba listos.
+
+:: ── 5.5. Operator seed ─────────────────────────
+echo [4.5/5] Poblando templates de operadores...
+docker compose run --rm -e PYTHONPATH=/app backend python seed_operators.py
+echo [✓] Templates de operadores listos.
 
 :: ── 6. Frontend ───────────────────────────────
 echo [5/5] Iniciando frontend...

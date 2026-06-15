@@ -1,13 +1,22 @@
+"use client"
+
 import { useCallback, useEffect, useState } from "react"
 import { api, ConversationOut, MessageOut } from "@/lib/api"
+import { useActiveInstance } from "@/hooks/use-active-instance"
 
 export function useConversations() {
+  const { instanceId } = useActiveInstance()
   const [conversations, setConversations] = useState<ConversationOut[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.conversations.list().then(setConversations).catch(() => {}).finally(() => setLoading(false))
-  }, [])
+    setLoading(true)
+    const params = instanceId ? { operator_instance_id: instanceId } : undefined
+    api.conversations.list(params)
+      .then(setConversations)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [instanceId])
 
   return { conversations, loading }
 }

@@ -9,6 +9,8 @@ class WorkspaceConfigUpdate(BaseModel):
     whatsapp_verify_token: str | None = None
     telegram_bot_token: str | None = None
     openai_api_key: str | None = None
+    hubspot_access_token: str | None = None
+    hubspot_portal_id: str | None = None
 
 
 class WorkspaceConfigResponse(WorkspaceConfigUpdate):
