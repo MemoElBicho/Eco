@@ -6,7 +6,7 @@ from app.models.operator_template import OperatorTemplate
 TEMPLATES: list[dict] = [
     {
         "slug": "eco-ventas",
-        "name": "Eco Ventas",
+        "name": "Echo Ventas",
         "description": (
             "Operador de ventas omnicanal con RAG de catalogo, gestion de leads "
             "en CRM y links de pago."
@@ -25,7 +25,7 @@ TEMPLATES: list[dict] = [
         "config_schema": {
             "type": "object",
             "properties": {
-                "bot_name": {"type": "string", "default": "Eco"},
+                "bot_name": {"type": "string", "default": "Echo"},
                 "company_name": {"type": "string"},
                 "industry": {
                     "type": "string",
@@ -46,7 +46,7 @@ TEMPLATES: list[dict] = [
     },
     {
         "slug": "eco-soporte",
-        "name": "Eco Soporte",
+        "name": "Echo Soporte",
         "description": (
             "Operador de atencion al cliente y soporte tecnico especializado "
             "con escalamiento inteligente."
@@ -65,7 +65,7 @@ TEMPLATES: list[dict] = [
         "config_schema": {
             "type": "object",
             "properties": {
-                "bot_name": {"type": "string", "default": "Eco"},
+                "bot_name": {"type": "string", "default": "Echo"},
                 "company_name": {"type": "string"},
                 "language": {"type": "string", "default": "es"},
             },
@@ -74,7 +74,7 @@ TEMPLATES: list[dict] = [
     },
     {
         "slug": "eco-onboarding",
-        "name": "Eco Onboarding",
+        "name": "Echo Onboarding",
         "description": (
             "Operador dedicado a guiar a nuevos clientes en su proceso de "
             "registro y configuracion inicial."
@@ -90,7 +90,7 @@ TEMPLATES: list[dict] = [
         "config_schema": {
             "type": "object",
             "properties": {
-                "bot_name": {"type": "string", "default": "Eco"},
+                "bot_name": {"type": "string", "default": "Echo"},
                 "company_name": {"type": "string"},
             },
             "required": ["company_name"],
@@ -98,7 +98,7 @@ TEMPLATES: list[dict] = [
     },
     {
         "slug": "eco-cobranza",
-        "name": "Eco Cobranza",
+        "name": "Echo Cobranza",
         "description": (
             "Operador de recordatorios de pago, conciliacion de facturas y "
             "envio de alertas de vencimiento."
@@ -114,7 +114,7 @@ TEMPLATES: list[dict] = [
         "config_schema": {
             "type": "object",
             "properties": {
-                "bot_name": {"type": "string", "default": "Eco"},
+                "bot_name": {"type": "string", "default": "Echo"},
                 "company_name": {"type": "string"},
             },
             "required": ["company_name"],
@@ -122,7 +122,7 @@ TEMPLATES: list[dict] = [
     },
     {
         "slug": "eco-assistant",
-        "name": "Eco Assistant",
+        "name": "Echo Assistant",
         "description": (
             "Asistente de IA multi-proposito con capacidad de RAG y CRM. "
             "Ideal para demostraciones y pruebas rapidas."
@@ -140,7 +140,7 @@ TEMPLATES: list[dict] = [
         "config_schema": {
             "type": "object",
             "properties": {
-                "bot_name": {"type": "string", "default": "Eco"},
+                "bot_name": {"type": "string", "default": "Echo"},
                 "company_name": {"type": "string"},
                 "language": {"type": "string", "default": "es"},
             },

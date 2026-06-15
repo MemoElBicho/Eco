@@ -102,7 +102,7 @@ export function Sidebar() {
     <SidebarRoot collapsible="icon">
       <SidebarHeader>
         <div className="flex flex-col gap-1 px-4 pt-4 pb-2">
-          <span className="text-lg font-semibold tracking-tight">Eco</span>
+          <span className="text-lg font-semibold tracking-tight">Echo</span>
           <DropdownMenu>
             <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
               <span className="truncate max-w-[140px]">
@@ -163,7 +163,7 @@ export function Sidebar() {
           </span>
         )}
         <span className="text-[10px] text-muted-foreground/60">
-          Eco v0.1.0
+          Echo v0.1.0
         </span>
       </SidebarFooter>
     </SidebarRoot>

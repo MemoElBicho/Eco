@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { TEST_USER, API_URL } from "./setup";
 
-test.describe("Eco Smoke Test — Deploy + Webhook", () => {
+test.describe("Echo Smoke Test — Deploy + Webhook", () => {
   let instanceId: string;
   let webhookToken: string;
 
@@ -15,7 +15,7 @@ test.describe("Eco Smoke Test — Deploy + Webhook", () => {
       page.getByRole("heading", { name: "Catálogo de Operadores" }),
     ).toBeVisible({ timeout: 10000 });
     await expect(
-      page.getByText("Eco Ventas"),
+      page.getByText("Echo Ventas"),
     ).toBeVisible({ timeout: 5000 });
 
     // Open deploy wizard for eco-ventas

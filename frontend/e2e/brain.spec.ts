@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Eco Brain', () => {
+test.describe('Echo Brain', () => {
   test.fixme('upload document and verify listing', async ({ page }) => {
     test.setTimeout(120_000);
     await page.goto('/brain');
@@ -9,7 +9,7 @@ test.describe('Eco Brain', () => {
     await page.locator('input[type="file"]').setInputFiles({
       name: 'knowledge.txt',
       mimeType: 'text/plain',
-      buffer: Buffer.from('Eco knowledge base test content for E2E.'),
+      buffer: Buffer.from('Echo knowledge base test content for E2E.'),
     });
 
     await page.getByRole('button', { name: 'Upload' }).click();

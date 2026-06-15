@@ -112,7 +112,7 @@ async def _get_or_create_operator_instance(
     result = await db.execute(
         select(OperatorInstance).where(
             OperatorInstance.organization_id == workspace_id,
-            OperatorInstance.name == "Eco Demo Bot",
+            OperatorInstance.name == "Echo Demo Bot",
         )
     )
     instance = result.scalar_one_or_none()
@@ -130,9 +130,9 @@ async def _get_or_create_operator_instance(
     instance = OperatorInstance(
         organization_id=workspace_id,
         template_id=template.id,
-        name="Eco Demo Bot",
+        name="Echo Demo Bot",
         config={
-            "bot_name": "Eco",
+            "bot_name": "Echo",
             "company_name": "Demo Corp",
             "industry": "ecommerce",
             "language": "es",
