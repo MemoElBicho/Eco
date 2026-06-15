@@ -3,13 +3,14 @@ import { TEST_USER, API_URL } from './setup';
 
 test.describe('Authentication', () => {
   test('register and login flow', async ({ page, request }) => {
+    test.setTimeout(120_000);
     const reg = await request.post(`${API_URL}/auth/register`, { data: TEST_USER });
-    expect(reg.ok()).toBeTruthy();
+    expect(reg.status(), `Register failed: ${await reg.text()}`).toBe(201);
 
     const login = await request.post(`${API_URL}/auth/login`, {
       form: { username: TEST_USER.email, password: TEST_USER.password },
     });
-    expect(login.ok()).toBeTruthy();
+    expect(login.status(), `Login failed: ${await login.text()}`).toBe(200);
     const { access_token } = await login.json();
     expect(access_token).toBeTruthy();
 

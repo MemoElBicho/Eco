@@ -4,7 +4,7 @@ services:
     runtime: docker
     rootDir: backend
     plan: free
-    dockerCommand: sh -c "gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:$PORT --keep-alive 5"
+    dockerCommand: sh -c "alembic upgrade head && gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:$PORT --keep-alive 5"
     healthCheckPath: /health
     envVars:
       - fromGroup: eco-backend-env
