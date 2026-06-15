@@ -1,33 +1,15 @@
-import asyncio
 from contextlib import asynccontextmanager
-from logging import getLogger
 
-from alembic.config import Config
-from alembic import command
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1.router import router
-from app.config import settings
 import app.services.tools  # noqa: F401 - register tool classes in ToolRegistry
-
-logger = getLogger(__name__)
-
-
-def _run_migrations() -> None:
-    cfg = Config("alembic.ini")
-    cfg.set_main_option("sqlalchemy.url", settings.database_url)
-    command.upgrade(cfg, "head")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
-        await asyncio.to_thread(_run_migrations)
-        logger.info("Database migrations applied successfully")
-    except Exception as exc:
-        logger.warning("Migration fallback failed (tables may already exist): %s", exc)
     yield
 
 
