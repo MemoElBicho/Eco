@@ -15,7 +15,7 @@ from app.api.v1.webhooks.hubspot import router as hubspot_router
 
 router = APIRouter(prefix="/api/v1")
 
-router.add_api_route("/auth/register", register, methods=["POST"])
+router.add_api_route("/auth/register", register, methods=["POST"], status_code=201)
 router.add_api_route("/auth/login", login, methods=["POST"])
 router.add_api_route("/auth/me", me, methods=["GET"])
 
