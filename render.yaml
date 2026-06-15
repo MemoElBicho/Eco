@@ -9,9 +9,8 @@ services:
     envVars:
       - fromGroup: eco-backend-env
       - key: DATABASE_URL
-        fromService:
+        fromDatabase:
           name: eco-postgres
-          type: database
           property: connectionString
       - key: REDIS_URL
         fromService:
@@ -28,9 +27,8 @@ services:
     envVars:
       - fromGroup: eco-backend-env
       - key: DATABASE_URL
-        fromService:
+        fromDatabase:
           name: eco-postgres
-          type: database
           property: connectionString
       - key: REDIS_URL
         fromService:
@@ -41,6 +39,7 @@ services:
   - type: redis
     name: eco-redis
     plan: starter
+    ipAllowList: []
 
 databases:
   - name: eco-postgres
