@@ -40,10 +40,7 @@ export default function CatalogPage() {
   const [selected, setSelected] = useState<Template | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    fetch(`${BASE}/catalog/`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
+    fetch(`${BASE}/catalog/`)
       .then((r) => r.json())
       .then(setTemplates)
       .catch(() => setTemplates([]))
