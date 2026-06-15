@@ -3,47 +3,32 @@ services:
     name: eco-backend
     runtime: docker
     rootDir: backend
-    dockerCommand: sh -c "gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --workers 2 --bind 0.0.0.0:$PORT --keep-alive 5 --max-requests 1000 --max-requests-jitter 100"
+    plan: free
+    dockerCommand: sh -c "gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --workers 1 --bind 0.0.0.0:$PORT --keep-alive 5"
     healthCheckPath: /health
-    plan: starter
     envVars:
       - fromGroup: eco-backend-env
       - key: DATABASE_URL
         fromDatabase:
           name: eco-postgres
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: eco-redis
-          type: redis
           property: connectionString
 
   - type: worker
     name: eco-celery
     runtime: docker
     rootDir: backend
-    dockerCommand: celery -A app.tasks.celery_app worker --loglevel=info
-    plan: starter
+    plan: free
+    dockerCommand: celery -A app.tasks.celery_app worker --loglevel=info --pool=solo
     envVars:
       - fromGroup: eco-backend-env
       - key: DATABASE_URL
         fromDatabase:
           name: eco-postgres
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: eco-redis
-          type: redis
-          property: connectionString
-
-  - type: redis
-    name: eco-redis
-    plan: starter
-    ipAllowList: []
 
 databases:
   - name: eco-postgres
-    plan: starter
+    plan: free
 
 envVarGroups:
   - name: eco-backend-env
@@ -56,6 +41,8 @@ envVarGroups:
         generateValue: true
       - key: LOG_LEVEL
         value: INFO
+      - key: REDIS_URL
+        sync: false
       - key: CORS_ORIGINS
         sync: false
       - key: FRONTEND_URL
