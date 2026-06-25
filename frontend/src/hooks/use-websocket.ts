@@ -2,22 +2,19 @@
 
 import { useEffect, useRef } from "react"
 import type { MessageOut } from "@/lib/api"
-import { useActiveInstance } from "@/hooks/use-active-instance"
 
 export function useWebSocket(
   workspaceId: string | null,
   onMessage: (msg: MessageOut) => void,
 ) {
-  const { instanceId } = useActiveInstance()
   const onMessageRef = useRef(onMessage)
   onMessageRef.current = onMessage
 
   useEffect(() => {
     if (!workspaceId) return
-    const wsId = instanceId || workspaceId
     const WS_BASE = process.env.NEXT_PUBLIC_WS_URL
     if (!WS_BASE) return
-    const ws = new WebSocket(`${WS_BASE}/${wsId}`)
+    const ws = new WebSocket(`${WS_BASE}/${workspaceId}`)
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
@@ -27,5 +24,5 @@ export function useWebSocket(
       } catch {}
     }
     return () => ws.close()
-  }, [workspaceId, instanceId])
+  }, [workspaceId])
 }
