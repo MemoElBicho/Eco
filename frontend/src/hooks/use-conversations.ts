@@ -38,6 +38,12 @@ export function useMessages(leadId: string | null) {
 
   useEffect(() => { refresh() }, [refresh])
 
+  useEffect(() => {
+    if (!leadId) return
+    const interval = setInterval(refresh, 4000)
+    return () => clearInterval(interval)
+  }, [leadId, refresh])
+
   const pushMessage = useCallback((msg: MessageOut) => {
     if (msg.lead_id === leadId) {
       setMessages((prev) => [...prev, msg])
