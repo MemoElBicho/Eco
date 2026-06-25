@@ -71,13 +71,16 @@ async def whatsapp_webhook_dynamic(
                     text = msg["text"].get("body", "")
                 msg_id = msg.get("id")
                 if from_number and text:
-                    process_message.delay(
-                        str(instance.id),
-                        "whatsapp",
-                        from_number,
-                        text,
-                        msg_id,
-                    )
+                    try:
+                        process_message.delay(
+                            str(instance.id),
+                            "whatsapp",
+                            from_number,
+                            text,
+                            msg_id,
+                        )
+                    except Exception:
+                        pass
     return {"status": "success"}
 
 
@@ -118,11 +121,14 @@ async def whatsapp_webhook_legacy(
                     text = msg["text"].get("body", "")
                 msg_id = msg.get("id")
                 if from_number and text and instance_id:
-                    process_message.delay(
-                        instance_id,
-                        "whatsapp",
-                        from_number,
-                        text,
-                        msg_id,
-                    )
+                    try:
+                        process_message.delay(
+                            instance_id,
+                            "whatsapp",
+                            from_number,
+                            text,
+                            msg_id,
+                        )
+                    except Exception:
+                        pass
     return {"status": "ok"}

@@ -1,18 +1,20 @@
-# Eco — Investor Pitch
+# Echo — Investor Pitch
 
 > **Un asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos internos, y organiza tus clientes automáticamente. Corre en tu propio servidor, tus datos no salen de tu control.**
 
 ---
 
-## 1. ¿Qué es Eco?
+## 1. ¿Qué es Echo?
 
-Eco es una plataforma **self-hosted** de automatización conversacional con IA para PYMES. Conecta WhatsApp y Telegram a un agente de inteligencia artificial que:
+Echo es una plataforma **self-hosted** de automatización conversacional con IA para PYMES. Conecta WhatsApp y Telegram a un agente de inteligencia artificial que:
 
 - **Responde automáticamente** usando el conocimiento real del negocio (PDFs, políticas, catálogos)
 - **Organiza leads** en un CRM integrado, con calificación automática por sentimiento
 - **Permite intervención humana** en tiempo real desde un dashboard unificado
 - **Sincroniza bidireccionalmente** con HubSpot (CRM externo)
 - **Corre en el servidor del cliente** — datos 100% privados, sin suscripciones SaaS obligatorias
+- **Catálogo de templates** para desplegar operadores de IA en 2 clics (ventas, soporte, cobranza, onboarding)
+- **Deploy Wizard** inteligente que configura el bot automáticamente según el vertical del negocio
 
 ---
 
@@ -44,7 +46,7 @@ sequenceDiagram
     participant D as 📊 Dashboard
 
     C->>WA: "¿Tienen habitación doble?"
-    WA->>API: POST /webhooks/whatsapp
+    WA->>API: POST /webhooks/telegram
     API->>Q: process_message.delay()
     Q->>DB: Buscar/Crear Lead
     Q->>RAG: Buscar docs relevantes
@@ -71,11 +73,11 @@ sequenceDiagram
 | **Cola de tareas** | Celery + Redis | Procesamiento asíncrono con reintentos ante fallos |
 | **IA** | Gemini 2.5 Flash + gemini-embedding-001 | RAG pipeline: embeddings 3072d + generación contextual |
 | **Mensajería** | Telegram Bot API, Meta WhatsApp Cloud API v21.0 | Canales directos donde ya están los clientes |
-| **Frontend** | Next.js 16 + Tailwind CSS v4 + shadcn/ui | App Router, server components, WebSocket en tiempo real |
+| **Frontend** | Next.js 16 + Tailwind CSS v4 + @base-ui/react | App Router, server components, WebSocket en tiempo real |
 | **Tiempo real** | FastAPI WebSockets | Mensajes entrantes/salientes al dashboard sin recargar |
 | **CRM Externo** | HubSpot API v3 | Sincronización bidireccional de contactos |
-| **Pagos** | Stripe Checkout + Billing Portal | Monetización multi-plan (free, pro, enterprise) |
-| **CI/CD** | GitHub Actions | Tests de backend (pytest) + E2E (Playwright) |
+| **Pagos** | Stripe (planeado) | Monetización multi-plan (free, pro, enterprise) |
+| **Tests** | pytest + Playwright E2E | 8 tests end-to-end automatizados |
 | **Infraestructura** | Docker Compose, ngrok | Deploy local en 1 comando, túnel público para webhooks |
 
 ```mermaid
@@ -86,7 +88,7 @@ flowchart TB
     end
 
     subgraph Backend["⚙️ Backend — FastAPI"]
-        WH[Webhooks]
+        WH[Webhooks por token]
         WS[WebSocket Manager]
         Auth[JWT Auth + RBAC]
     end
@@ -106,15 +108,15 @@ flowchart TB
     end
 
     subgraph Frontend["🖥️ Dashboard — Next.js"]
+        Cat[Catálogo Templates]
+        Deploy[Deploy Wizard]
         Leads[CRM Leads]
         Chat[Live Chat Hub]
-        Brain[Eco Brain]
-        Settings[Settings]
+        Brain[Echo Brain]
     end
 
     subgraph Ext["🔌 Integraciones"]
         HS[HubSpot CRM]
-        ST[Stripe Pagos]
     end
 
     WA & TG --> WH
@@ -127,10 +129,10 @@ flowchart TB
     CW --> WA & TG
     CW --> WS
     WS --> Chat
-    Auth --> Leads & Brain & Settings
+    Auth --> Leads & Brain & Deploy & Cat
     Leads & Chat & Brain --> PG
     CW --> HS
-    Frontend --> ST
+    Cat --> Deploy
 ```
 
 ---
@@ -139,15 +141,16 @@ flowchart TB
 
 > *"No reinventamos la rueda. Ensamblamos las mejores piezas y las hacemos funcionar juntas."*
 
-Eco no compite construyendo modelos de IA propios ni reinventando infraestructura. Competimos en **integración y experiencia**:
+Echo no compite construyendo modelos de IA propios ni reinventando infraestructura. Competimos en **integración y experiencia**:
 
-| Principio | Aplicación en Eco |
+| Principio | Aplicación en Echo |
 |---|---|
 | **Stand on giants** | Gemini para IA, pgvector para búsqueda, Celery para tareas — tecnología probada en producción |
 | **Glue, not rebuild** | FastAPI actúa como orquestador entre WhatsApp, Telegram, IA, DB y frontend |
 | **Data sovereignty** | Self-hosted: el cliente es dueño de sus datos, sus conversaciones, sus documentos |
-| **Progressive complexity** | Funciona en 1 comando (`dev.bat`). La complejidad (multi-tenant, multi-canal, RAG) está abstraída |
-| **Human-in-the-loop** | La IA no reemplaza al humano — lo asiste. Un clic y el humano toma el control |
+| **Progressive complexity** | Funciona en 1 comando (`.\dev.ps1`). La complejidad (multi-tenant, multi-canal, RAG) está abstraída |
+| **Human-in-the-loop** | La IA no reemplaza al humano — lo asiste. Un clic en "Pause AI" y el humano toma el control |
+| **Template-driven deployment** | 5 templates pre-entrenados (Ventas, Soporte, Onboarding, Cobranza, Assistant). Elige uno y despliega en 2 clics |
 
 ---
 
@@ -159,23 +162,24 @@ Eco no compite construyendo modelos de IA propios ni reinventando infraestructur
 | **Pro** | $49/mes | Mensajes ilimitados, 50 documentos, leads ilimitados, HubSpot sync |
 | **Enterprise** | $199/mes | Multi-workspace, white-label, soporte prioritario, integraciones personalizadas |
 
-**Ventaja competitiva en pricing:** Al ser self-hosted, no hay costo de infraestructura para Eco. El cliente paga su propio VPS ($6/mes) + su API key de Gemini (pay-per-use).
+**Ventaja competitiva en pricing:** Al ser self-hosted, no hay costo de infraestructura para Echo. El cliente paga su propio VPS ($6/mes) + su API key de Gemini (pay-per-use).
 
 ---
 
 ## 7. Competencia y Posicionamiento
 
-| | **Eco** | **Sintra.ai** | **ManyChat** | **Chatbase** |
+| | **Echo** | **Sintra.ai** | **ManyChat** | **Chatbase** |
 |---|---|---|---|---|
 | Self-hosted | ✅ | ❌ | ❌ | ❌ |
 | WhatsApp + Telegram | ✅ | ❌ | ✅ | ❌ |
 | CRM integrado | ✅ | ❌ | ❌ | ❌ |
 | RAG con docs propios | ✅ | Limitado | ❌ | ✅ |
+| Templates verticales | ✅ 5 verticales | ❌ | ❌ | ❌ |
 | Multi-tenant | ✅ | ✅ | ❌ | ❌ |
 | White-label | ✅ | ❌ | ❌ | ❌ |
 | Precio entry | $0 | $59/mes | $15/mes | $19/mes |
 
-**Diferenciador clave:** Eco es el único que ofrece self-hosted + IA con RAG + CRM + multi-canal en un solo producto. El cliente controla sus datos y paga solo por lo que usa.
+**Diferenciador clave:** Echo es el único que ofrece self-hosted + IA con RAG + CRM + templates por vertical + multi-canal en un solo producto. El cliente controla sus datos y paga solo por lo que usa.
 
 ---
 
@@ -183,26 +187,30 @@ Eco no compite construyendo modelos de IA propios ni reinventando infraestructur
 
 | Fase | Estado | Hito |
 |---|---|---|
-| **Fase 1-5** | ✅ Completado | Backend, Telegram, WhatsApp, Dashboard, Stripe |
-| **Fase 6** | ✅ Completado | RAG con pgvector + Gemini, Brain upload de documentos |
-| **Fase 7** | ✅ Completado | Stripe suscripciones, facturación, webhooks de pago |
-| **Fase 8** | ✅ Completado | HubSpot CRM bidireccional, sincronización de contactos |
-| **Fase 9** | ✅ Completado | Tests automatizados (pytest + Playwright), CI/CD |
-| **Fase 10** | 🔜 Próximo | One-click deploy, white-label, analytics dashboard |
+| **Fase 1** | ✅ Completado | Backend FastAPI + PostgreSQL + Alembic migrations |
+| **Fase 2** | ✅ Completado | Telegram + WhatsApp webhooks con routing dinámico por token |
+| **Fase 3** | ✅ Completado | Dashboard Next.js: Live Chat, CRM Leads, Brain, Auth JWT |
+| **Fase 4** | ✅ Completado | RAG con pgvector + Gemini, Brain upload de documentos PDF/TXT |
+| **Fase 5** | ✅ Completado | Catálogo de templates + Deploy Wizard dinámico |
+| **Fase 6** | ✅ Completado | HubSpot CRM bidireccional, sincronización de contactos |
+| **Fase 7** | ✅ Completado | Tests automatizados (pytest + 8 tests Playwright E2E) |
+| **Fase 8** | ✅ Completado | Celery worker + Redis para procesamiento asíncrono de mensajes |
+| **Fase 9** | 🔜 Próximo | Stripe suscripciones, facturación, webhooks de pago |
+| **Fase 10** | 📋 Planeado | One-click deploy, white-label total, analytics dashboard |
 | **Fase 11** | 📋 Planeado | Voice calls, Instagram DM, acciones reales (agendar, pagar) |
 | **Fase 12** | 📋 Planeado | Multi-agente (ventas/soporte/cobranza), no-code flow builder |
 
 ---
 
-## 9. Cómo llevar Eco al siguiente nivel
+## 9. Cómo llevar Echo al siguiente nivel
 
 | Mejora | Impacto | Descripción |
 |---|---|---|
-| **One-click deploy** | 🚀 Adopción | `curl \| bash` y en 60 segundos Eco corre en un VPS de $6/mes con SSL y dominio. Sin Docker, sin manuales. |
-| **Templates por industria** | 🎯 Conversión | Inmobiliario, salud, e-commerce, educación — el cliente elige su vertical y Eco precarga PDFs, respuestas y flujos. Onboarding de 15 min → 5 min. |
+| **One-click deploy** | 🚀 Adopción | `curl \| bash` y en 60 segundos Echo corre en un VPS de $6/mes con SSL y dominio. Sin Docker, sin manuales. |
+| **Templates por industria** | 🎯 Conversión | Inmobiliario, salud, e-commerce, educación — el cliente elige su vertical y Echo precarga PDFs, respuestas y flujos. Onboarding de 15 min → 5 min. |
 | **Multi-agente** | 🧠 Diferenciación | Agentes IA separados por área (ventas, soporte, cobranza) con personalidad y conocimiento distintos. Enrutados por intención del mensaje. |
-| **White-label total** | 🏷️ Empresas | Logo, colores, nombre del bot, dominio propio del cliente. Eco invisible. Ideal para agencias que revenden a sus clientes. |
-| **Voice + más canales** | 📞 Alcance | Llamadas telefónicas (TTS/STV), Instagram DM, Facebook Messenger, email. Donde está el cliente, ahí está Eco. |
+| **White-label total** | 🏷️ Empresas | Logo, colores, nombre del bot, dominio propio del cliente. Echo invisible. Ideal para agencias que revenden a sus clientes. |
+| **Voice + más canales** | 📞 Alcance | Llamadas telefónicas (TTS/STV), Instagram DM, Facebook Messenger, email. Donde está el cliente, ahí está Echo. |
 | **Acciones reales** | ⚡ Valor | El bot ejecuta: crea cotizaciones, manda link de pago, agenda en Google Calendar, consulta stock del ERP. |
 | **Analytics dashboard** | 📊 Retención | Qué preguntan, tasa de resolución bot vs humano, en qué etapa se caen los leads, ROI por canal. Datos que el negocio necesita. |
 | **Multi-idioma nativo** | 🌍 Mercado | Detección automática de idioma, respuesta en el mismo idioma. Expande el TAM a LATAM, Europa, Asia. |
@@ -226,12 +234,13 @@ flowchart LR
 
 ---
 
-## 10. ¿Qué hace a Eco defendible?
+## 10. ¿Qué hace a Echo defendible?
 
 1. **Efecto compounding del conocimiento:** Cada documento que el cliente sube hace al bot más inteligente para SU negocio — migrar a otra plataforma significa re-entrenar desde cero.
-2. **Integración vertical:** El cliente no necesita 4 herramientas (bot + CRM + knowledge base + dashboard). Eco es las 4 en una.
+2. **Integración vertical:** El cliente no necesita 4 herramientas (bot + CRM + knowledge base + dashboard). Echo es las 4 en una.
 3. **Costo de cambio bajo para adoptar, alto para abandonar:** Entrar es gratis. Salir implica perder todo el conocimiento acumulado, los leads organizados y la integración con HubSpot.
-4. **Datos como foso:** Mientras más conversaciones procesa Eco, mejor entendemos los patrones de cada industria para ofrecer templates pre-entrenados.
+4. **Datos como foso:** Mientras más conversaciones procesa Echo, mejor entendemos los patrones de cada industria para ofrecer templates pre-entrenados.
+5. **Deploy Wizard patentable:** El proceso de configurar un bot de IA en 2 clics es una barrera de entrada contra competidores que requieren configuración manual compleja.
 
 ---
 
@@ -250,13 +259,14 @@ flowchart LR
 
 ## 12. Equipo y Filosofía
 
-Eco se construye bajo **Harness Engineering**: no competimos en investigación de IA fundamental. Nuestra ventaja es saber integrar lo mejor que ya existe (Gemini, pgvector, FastAPI, Celery) en un producto que una PYME puede instalar, entender y usar en una tarde.
+Echo se construye bajo **Harness Engineering**: no competimos en investigación de IA fundamental. Nuestra ventaja es saber integrar lo mejor que ya existe (Gemini, pgvector, FastAPI, Celery) en un producto que una PYME puede instalar, entender y usar en una tarde.
 
 **Principios del equipo:**
 - **Ship fast, iterate faster** — funcional sobre perfecto
 - **El código es un liability, no un asset** — menos líneas, menos bugs
-- **Self-hosted no significa complicado** — `dev.bat` y listo
+- **Self-hosted no significa complicado** — `.\dev.ps1` y listo
 - **El usuario es dueño de sus datos** — sin excepciones
+- **Templates, not complexity** — el Deploy Wizard abstrae la configuración técnica
 
 ---
 
@@ -264,8 +274,8 @@ Eco se construye bajo **Harness Engineering**: no competimos en investigación d
 
 Hay **330 millones de PYMES** en el mundo. La mayoría usa WhatsApp para comunicarse con clientes. Casi ninguna tiene un bot con IA que conozca su negocio. Las que lo intentan usan SaaS que se llevan sus datos y cobran por mensaje.
 
-**Eco les da el control. Por el precio de un VPS.**
+**Echo les da el control. Por el precio de un VPS.**
 
 ---
 
-*Eco v0.1.0 — Junio 2026*
+*Echo v0.1.0 — Junio 2026*

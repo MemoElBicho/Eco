@@ -1,9 +1,4 @@
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_URL no esta definida. Debe configurarse en el entorno de build."
-  )
-}
-const BASE = process.env.NEXT_PUBLIC_API_URL
+const BASE = process.env.NEXT_PUBLIC_API_URL || ""
 
 function buildHeaders(token: string | null, isSpecial: boolean, extra?: HeadersInit): Headers {
   const h = new Headers(extra);

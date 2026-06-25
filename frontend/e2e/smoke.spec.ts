@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { TEST_USER, API_URL } from "./setup";
 
-test.describe("Echo Smoke Test — Deploy + Webhook", () => {
+test.describe.serial("Echo Smoke Test — Deploy + Webhook", () => {
   let instanceId: string;
   let webhookToken: string;
 
@@ -9,30 +9,26 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
     page,
     request,
   }) => {
-    // Navigate to catalog
     await page.goto("/catalog");
     await expect(
       page.getByRole("heading", { name: "Catálogo de Operadores" }),
     ).toBeVisible({ timeout: 10000 });
     await expect(
-      page.getByText("Echo Ventas"),
+      page.getByText("Eco Ventas"),
     ).toBeVisible({ timeout: 5000 });
 
-    // Open deploy wizard for eco-ventas
     await page.locator("button", { hasText: "Desplegar" }).first().click();
     await expect(page.getByText("Configura los parámetros")).toBeVisible({
       timeout: 3000,
     });
 
-    // Get auth token from localStorage
     const token = await page.evaluate(() => localStorage.getItem("token"));
     const headers: Record<string, string> = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    // Close the wizard — we create via API to bypass missing industry field
-    await page.getByRole("button", { name: "Close" }).click();
+    // Close the wizard via X button
+    await page.locator("button").filter({ has: page.locator("svg.lucide-x") }).click();
 
-    // Create operator via API with full config
     const createRes = await request.post(`${API_URL}/operators/`, {
       data: {
         template_slug: "eco-ventas",
@@ -52,14 +48,12 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
     });
     expect(createRes.ok(), `Create operator failed: ${createRes.status()} ${await createRes.text()}`).toBeTruthy();
 
-    // Navigate to operators list and verify the new bot appears
     await page.goto("/operators");
     await expect(
-      page.getByRole("heading", { name: "Mis Bots" }),
+      page.locator('a').filter({ hasText: 'Nuevo Bot' }),
     ).toBeVisible({ timeout: 10000 });
     await expect(page.getByText("E2E Bot").first()).toBeVisible({ timeout: 5000 });
 
-    // Fetch instance ID via API for later webhook test
     const listResp = await request.get(`${API_URL}/operators/`, { headers });
     expect(listResp.ok()).toBeTruthy();
     const instances = await listResp.json();
@@ -70,7 +64,6 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
     instanceId = e2e.id;
     webhookToken = e2e.webhook_token;
 
-    // Activate the instance via API
     await request.post(`${API_URL}/operators/${instanceId}/deploy`, { headers });
   });
 
@@ -80,24 +73,20 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
     await page.goto("/");
     await page.waitForTimeout(500);
 
-    // Sidebar is visible
-    const sidebar = page.locator('[data-slot="sidebar"]');
+    const sidebar = page.locator("aside");
     await expect(sidebar).toBeVisible({ timeout: 5000 });
 
-    // Verify nav items
     await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Catálogo' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Mis Bots' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Brain/RAG' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Integraciones' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Leads' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Conversaciones' })).toBeVisible();
 
-    // Instance selector dropdown exists
     const trigger = page.locator("button", { hasText: /E2E Bot|Sin instancia/ });
     await expect(trigger).toBeVisible();
     await trigger.click();
     await page.waitForTimeout(300);
 
-    // Select the E2E Bot instance if present
     const option = page.locator("[role=menuitem]", { hasText: "E2E Bot" });
     if (await option.isVisible()) {
       await option.click();
@@ -114,7 +103,6 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
     const sender = "5219988776655";
     const msgBody = "Hola E2E, ¿me pueden ayudar con mi pedido?";
 
-    // POST to the legacy whatsapp webhook (finds first active instance)
     const payload = {
       entry: [
         {
@@ -144,7 +132,6 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
     const headers: Record<string, string> = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    // Poll for the new lead via API (Celery is async)
     let found = false;
     for (let i = 0; i < 10; i++) {
       await page.waitForTimeout(1500);
@@ -156,26 +143,20 @@ test.describe("Echo Smoke Test — Deploy + Webhook", () => {
       }
     }
 
-    // Navigate to conversations and verify the new lead appears
     await page.goto("/conversations");
-    await expect(
-      page.getByRole("heading", { name: "Live Chats" }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("aside")).toBeVisible({ timeout: 5000 });
 
     if (found) {
       await expect(
         page.locator("button", { hasText: sender }),
       ).toBeVisible({ timeout: 8000 });
 
-      // Click the conversation
       await page.locator("button", { hasText: sender }).click();
       await page.waitForTimeout(1000);
 
-      // Verify the inbound message is displayed
       await expect(page.getByText(msgBody)).toBeVisible({ timeout: 5000 });
 
-      // The eco_bot should have responded
-      const botResponses = page.locator('[data-direction="out"], .bg-primary');
+      const botResponses = page.locator('.bg-gradient-to-r');
       const botCount = await botResponses.count();
       expect(botCount).toBeGreaterThan(0);
     }

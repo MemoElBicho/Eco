@@ -26,6 +26,9 @@ services:
     build: ./backend
     ports: ["8000:8000"]
     env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://eco:eco_secret@postgres:5432/eco_db
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -36,6 +39,9 @@ services:
     build: ./backend
     command: celery -A app.tasks.celery_app worker --loglevel=info --pool=solo
     env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://eco:eco_secret@postgres:5432/eco_db
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       redis: { condition: service_healthy }
       postgres: { condition: service_healthy }

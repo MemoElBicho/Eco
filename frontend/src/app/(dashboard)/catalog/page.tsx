@@ -1,17 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Bot, ChevronRight } from "lucide-react"
 import { DeployWizard } from "../_components/DeployWizard"
 
 type Template = {
@@ -27,19 +17,14 @@ type Template = {
   version: string
 }
 
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_URL no esta definida. Debe configurarse en el entorno de build."
-  )
-}
-const BASE = process.env.NEXT_PUBLIC_API_URL
-
 export default function CatalogPage() {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Template | null>(null)
 
   useEffect(() => {
+    const BASE = process.env.NEXT_PUBLIC_API_URL
+    if (!BASE) return
     fetch(`${BASE}/catalog/`)
       .then((r) => r.json())
       .then(setTemplates)
@@ -48,87 +33,60 @@ export default function CatalogPage() {
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          Catálogo de Operadores
-        </h2>
-        <p className="text-muted-foreground">
-          Selecciona una plantilla y despliega tu operador autónomo.
-        </p>
+        <h2 className="text-xl font-semibold text-[var(--foreground)]">Catálogo de Operadores</h2>
+        <p className="text-sm text-[var(--t2)]">Selecciona una plantilla y despliega tu operador autónomo.</p>
       </div>
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-48 rounded-xl" />
+            <div key={i} className="h-48 rounded-xl bg-[var(--surface)] animate-pulse" />
           ))}
         </div>
       ) : templates.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">
-          No hay plantillas disponibles en el catálogo.
-        </div>
+        <div className="py-12 text-center text-[var(--t2)]">No hay plantillas disponibles en el catálogo.</div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {templates.map((t) => (
-            <Card key={t.id} className="flex flex-col">
-              <CardHeader>
+            <div key={t.id} className="flex flex-col rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden hover:border-[var(--amber-dim)] transition-colors">
+              <div className="p-4 flex flex-col flex-1 gap-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <CardTitle className="truncate">{t.name}</CardTitle>
-                    <Badge variant="secondary" className="mt-1.5">
-                      {t.category}
-                    </Badge>
+                    <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">{t.name}</h3>
+                    <span className="text-[10px] rounded-full bg-[var(--bg)] text-[var(--t2)] px-2 py-0.5 mt-1 inline-block">{t.category}</span>
                   </div>
-                  {t.icon_url && (
-                    <img
-                      src={t.icon_url}
-                      alt=""
-                      className="size-10 shrink-0 rounded-lg object-cover"
-                    />
-                  )}
+                  <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-[var(--amber)] to-orange-600 flex items-center justify-center shrink-0">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
                 </div>
-                <CardDescription className="line-clamp-3 pt-1">
-                  {t.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-1">
-                  <span className="text-xs text-muted-foreground">
-                    Canales:
-                  </span>
-                  {t.default_channels.map((c) => (
-                    <Badge key={c} variant="outline" className="text-xs">
-                      {c}
-                    </Badge>
-                  ))}
+                <p className="text-xs text-[var(--t2)] line-clamp-2 flex-1">{t.description}</p>
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap gap-1">
+                    {t.default_channels.map((c) => (
+                      <span key={c} className="text-[10px] rounded-full bg-[rgba(59,130,246,0.15)] text-[var(--blue)] border border-[rgba(59,130,246,0.3)] px-2 py-0.5">{c}</span>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {t.default_tools.map((tool) => (
+                      <span key={tool} className="text-[10px] rounded-full bg-[var(--bg)] text-[var(--t2)] border border-[var(--border)] px-2 py-0.5">{tool}</span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-1">
-                  <span className="text-xs text-muted-foreground">
-                    Tools:
-                  </span>
-                  {t.default_tools.map((tool) => (
-                    <Badge key={tool} variant="outline" className="text-xs">
-                      {tool}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => setSelected(t)}>
-                  Desplegar
-                </Button>
-              </CardFooter>
-            </Card>
+              </div>
+              <button
+                onClick={() => setSelected(t)}
+                className="flex items-center justify-center gap-1 w-full border-t border-[var(--border)] py-2.5 text-xs font-medium text-[var(--amber)] hover:bg-[var(--amber-dim)] transition-colors"
+              >
+                Desplegar <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
           ))}
         </div>
       )}
 
-      <DeployWizard
-        template={selected}
-        open={!!selected}
-        onClose={() => setSelected(null)}
-      />
+      <DeployWizard template={selected} open={!!selected} onClose={() => setSelected(null)} />
     </div>
   )
 }

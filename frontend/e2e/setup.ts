@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+import { resolve } from "path";
+dotenv.config({ path: resolve(__dirname, "..", ".env.local") });
+
 export const TEST_USER = {
   name: 'E2E User',
   email: `eco-e2e-${Date.now()}@example.com`,

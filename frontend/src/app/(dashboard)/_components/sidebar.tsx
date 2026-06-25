@@ -15,17 +15,6 @@ import {
 } from "lucide-react"
 
 import {
-  Sidebar as SidebarRoot,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarHeader,
-  SidebarFooter,
-} from "@/components/ui/sidebar"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -37,24 +26,34 @@ type Operator = { id: string; name: string; status: string }
 
 const STORAGE_KEY = "eco_active_instance"
 
-const NAV = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/catalog", label: "Catálogo", icon: Store },
-  { href: "/operators", label: "Mis Bots", icon: Bot },
-  { href: "/leads", label: "Leads", icon: Users },
-  { href: "/conversations", label: "Conversaciones", icon: MessageSquare },
-  { href: "/brain", label: "Brain", icon: Brain },
-  { href: "/settings", label: "Configuración", icon: Settings },
+const NAV_GROUPS = [
+  {
+    title: "Principal",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutDashboard, badge: null },
+      { href: "/conversations", label: "Conversaciones", icon: MessageSquare, badge: 12 },
+      { href: "/leads", label: "Leads", icon: Users, badge: 45 },
+    ],
+  },
+  {
+    title: "IA & Datos",
+    items: [
+      { href: "/brain", label: "Brain/RAG", icon: Brain, badge: null },
+      { href: "/catalog", label: "Análisis Sentimiento", icon: Store, badge: 5 },
+    ],
+  },
+  {
+    title: "Sistema",
+    items: [
+      { href: "/operators", label: "Integraciones", icon: Bot, badge: null },
+      { href: "/settings", label: "Configuración", icon: Settings, badge: null },
+    ],
+  },
 ]
 
-if (!process.env.NEXT_PUBLIC_API_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_URL no esta definida. Debe configurarse en el entorno de build."
-  )
-}
-const BASE = process.env.NEXT_PUBLIC_API_URL
-
 async function fetchOperators(): Promise<Operator[]> {
+  const BASE = process.env.NEXT_PUBLIC_API_URL
+  if (!BASE) return []
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null
   if (!token) return []
@@ -99,73 +98,96 @@ export function Sidebar() {
   const active = instances.find((i) => i.id === activeId)
 
   return (
-    <SidebarRoot collapsible="icon">
-      <SidebarHeader>
-        <div className="flex flex-col gap-1 px-4 pt-4 pb-2">
-          <span className="text-lg font-semibold tracking-tight">Echo</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
-              <span className="truncate max-w-[140px]">
-                {active?.name || "Sin instancia"}
-              </span>
-              <ChevronDown className="ml-auto size-3 shrink-0" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              {instances.map((inst) => (
-                <DropdownMenuItem
-                  key={inst.id}
-                  onSelect={() => handleSelect(inst.id)}
-                  className={
-                    inst.id === activeId ? "font-medium bg-muted/50" : ""
-                  }
-                >
-                  <span className="truncate">{inst.name}</span>
-                  {inst.status !== "active" && (
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {inst.status}
-                    </span>
-                  )}
-                </DropdownMenuItem>
-              ))}
-              {instances.length === 0 && (
-                <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                  Sin instancias activas
-                </div>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <aside className="w-[220px] bg-[var(--bg2)] border-r border-[var(--border)] h-full flex flex-col">
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-6 w-6 rounded bg-gradient-to-br from-[var(--amber)] to-orange-600 flex items-center justify-center">
+            <Bot className="h-3.5 w-3.5 text-white" />
+          </div>
+          <span className="text-lg font-semibold text-[var(--foreground)]">ECHO</span>
         </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV.map(({ href, label, icon: Icon }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton
-                    render={<Link href={href} />}
-                    isActive={pathname === href}
-                    tooltip={label}
+        <div className="text-[10px] text-[var(--t2)]">BI Dashboard</div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[var(--t2)] hover:bg-[var(--surface)] hover:text-[var(--foreground)] transition-colors">
+            <span className="truncate max-w-[140px]">
+              {active?.name || "Sin instancia"}
+            </span>
+            <ChevronDown className="ml-auto size-3 shrink-0" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56 bg-[var(--bg2)] border-[var(--border)]">
+            {instances.map((inst) => (
+              <DropdownMenuItem
+                key={inst.id}
+                onSelect={() => handleSelect(inst.id)}
+                className={
+                  inst.id === activeId
+                    ? "font-medium bg-[var(--surface)] text-[var(--foreground)]"
+                    : "text-[var(--foreground)]"
+                }
+              >
+                <span className="truncate">{inst.name}</span>
+                {inst.status !== "active" && (
+                  <span className="ml-auto text-xs text-[var(--t2)]">
+                    {inst.status}
+                  </span>
+                )}
+              </DropdownMenuItem>
+            ))}
+            {instances.length === 0 && (
+              <div className="px-2 py-3 text-sm text-[var(--t2)] text-center">
+                Sin instancias activas
+              </div>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="flex-1 overflow-y-auto px-3 py-2">
+        {NAV_GROUPS.map((group, groupIndex) => (
+          <div key={group.title} className="mb-4">
+            {groupIndex > 0 && (
+              <div className="text-[10px] uppercase tracking-wider text-[var(--t2)] mb-2 px-3">
+                {group.title}
+              </div>
+            )}
+            <nav className="space-y-1">
+              {group.items.map(({ href, label, icon: Icon, badge }) => {
+                const isActive = pathname === href
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${isActive
+                        ? "bg-[var(--amber-dim)] text-[var(--amber)] border border-[rgba(245,158,11,0.2)]"
+                        : "text-[var(--t2)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                      }`}
                   >
-                    <Icon />
-                    <span>{label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter className="flex flex-col gap-1 p-4">
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate flex-1">{label}</span>
+                    {badge && (
+                      <span className="bg-[var(--red)] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                        {badge}
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+        ))}
+      </div>
+      <div className="p-4 border-t border-[var(--border)]">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-[var(--green)] animate-pulse" />
+          <span className="text-xs font-medium text-[var(--green)]">Bot Activo</span>
+          <span className="text-[10px] text-[var(--t2)] ml-auto">Live: 7</span>
+        </div>
         {user && (
-          <span className="text-xs text-muted-foreground truncate">
+          <div className="mt-2 text-xs text-[var(--t2)] truncate">
             {user.name}
-          </span>
+          </div>
         )}
-        <span className="text-[10px] text-muted-foreground/60">
-          Echo v0.1.0
-        </span>
-      </SidebarFooter>
-    </SidebarRoot>
+        <div className="text-[10px] text-[var(--t2)]/60 mt-1">Echo v0.1.0</div>
+      </div>
+    </aside>
   )
 }

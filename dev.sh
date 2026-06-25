@@ -17,39 +17,39 @@ if [ ! -f ".env" ]; then
 fi
 
 # ── 2. Docker Compose ───────────────────────────
-echo "[1/5] Levantando contenedores Docker..."
+echo "[1/6] Levantando contenedores Docker..."
 docker compose up -d
 echo "[✓] PostgreSQL + Redis + Backend + Celery iniciados."
 
 # ── 3. Esperar PostgreSQL ──────────────────────
-echo "[2/5] Esperando a que PostgreSQL esté saludable..."
+echo "[2/6] Esperando a que PostgreSQL esté saludable..."
 until docker compose exec -T postgres pg_isready -U eco -d eco_db > /dev/null 2>&1; do
     sleep 2
 done
 echo "[✓] PostgreSQL listo."
 
 # ── 4. Migraciones ─────────────────────────────
-echo "[3/5] Ejecutando migraciones de Alembic..."
+echo "[3/6] Ejecutando migraciones de Alembic..."
 docker compose run --rm -e PYTHONPATH=/app backend alembic upgrade head
 echo "[✓] Migraciones aplicadas."
 
 # ── 5. Seed data ───────────────────────────────
-echo "[4/5] Poblando datos de prueba..."
+echo "[4/6] Poblando datos de prueba..."
+docker compose run --rm -e PYTHONPATH=/app backend python seed_operators.py
 docker compose run --rm -e PYTHONPATH=/app backend python seed_data.py
 echo "[✓] Datos de prueba listos."
 
-# ── 5.5. Operator seed ─────────────────────────
-echo "[4.5/5] Poblando templates de operadores..."
-docker compose run --rm -e PYTHONPATH=/app backend python seed_operators.py
-echo "[✓] Templates de operadores listos."
-
 # ── 6. Frontend ────────────────────────────────
-echo "[5/5] Iniciando frontend..."
+echo "[5/6] Compilando frontend..."
 if [ ! -d "frontend/node_modules" ]; then
     echo "      Instalando dependencias npm..."
     cd frontend && npm install && cd ..
 fi
-cd frontend && npm run dev &
+cd frontend && npm run build
+echo "[✓] Frontend compilado."
+
+echo "[6/6] Iniciando frontend..."
+npx next start &
 FRONTEND_PID=$!
 cd ..
 
@@ -61,7 +61,7 @@ echo "   Backend:   http://localhost:8000"
 echo "   Frontend:  http://localhost:3000"
 echo "   API Docs:  http://localhost:8000/docs"
 echo ""
-echo "   Registrate en /register y empezá a usar Eco."
+echo "   Registrate en /register o usa demo@eco.ai / demo1234"
 echo "============================================"
 echo ""
 

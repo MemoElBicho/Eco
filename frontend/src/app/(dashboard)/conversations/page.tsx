@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useState } from "react"
-import { Card } from "@/components/ui/card"
 import { ChatList } from "@/components/conversations/chat-list"
 import { ChatWindow } from "@/components/conversations/chat-window"
 import { useConversations, useMessages } from "@/hooks/use-conversations"
@@ -34,17 +33,16 @@ export default function ConversationsPage() {
   })
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4">
-      <Card className="flex w-80 shrink-0 flex-col overflow-hidden" size="sm">
+    <div className="flex h-full gap-3">
+      <div className="w-80 shrink-0 rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
         <ChatList
           conversations={conversations}
           loading={listLoading}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />
-      </Card>
-
-      <Card className="flex flex-1 flex-col overflow-hidden" size="sm">
+      </div>
+      <div className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
         <ChatWindow
           conversation={active}
           messages={messages}
@@ -52,7 +50,7 @@ export default function ConversationsPage() {
           onSend={handleSend}
           onToggleBot={handleToggleBot}
         />
-      </Card>
+      </div>
     </div>
   )
 }

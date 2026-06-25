@@ -4,7 +4,7 @@ import { API_URL } from './setup';
 test.describe('CRM Leads', () => {
   test('create and delete a lead', async ({ page, request }) => {
     await page.goto('/leads');
-    await expect(page.getByRole('heading', { name: 'Leads' })).toBeVisible();
+    await expect(page.locator('button').filter({ hasText: 'Add Lead' })).toBeVisible({ timeout: 5000 });
 
     const token = await page.evaluate(() => localStorage.getItem('token'));
     const headers: Record<string, string> = {};

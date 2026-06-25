@@ -15,6 +15,7 @@ from app.models.operator_template import OperatorTemplate
 from app.models.operator_instance import OperatorInstance
 from app.models.operator_channel import OperatorChannel
 from app.models.operator_tool import OperatorTool
+from app.config import settings
 
 DEMO_EMAIL = "demo@eco.ai"
 DEMO_PASSWORD = "demo1234"
@@ -144,7 +145,7 @@ async def _get_or_create_operator_instance(
     await db.flush()
 
     db.add(OperatorChannel(operator_instance_id=instance.id, channel="whatsapp"))
-    db.add(OperatorChannel(operator_instance_id=instance.id, channel="telegram"))
+    db.add(OperatorChannel(operator_instance_id=instance.id, channel="telegram", external_id=settings.telegram_bot_token))
     for tool_type in template.default_tools:
         db.add(OperatorTool(operator_instance_id=instance.id, tool_type=tool_type))
     await db.flush()

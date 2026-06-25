@@ -12,6 +12,7 @@ from app.api.v1.webhooks.whatsapp import router as whatsapp_router
 from app.api.v1.catalog import router as catalog_router
 from app.api.v1.operators import router as operators_router
 from app.api.v1.webhooks.hubspot import router as hubspot_router
+from app.api.v1.metrics import router as metrics_router
 
 router = APIRouter(prefix="/api/v1")
 
@@ -30,3 +31,4 @@ router.include_router(settings_router)
 router.include_router(billing_router)
 router.include_router(catalog_router)
 router.include_router(operators_router)
+router.include_router(metrics_router)

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Echo — Guía Completa para Nuevos Usuarios</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --primary-light: #fff7ed;
+            --blue: #3b82f6;
+            --green: #22c55e;
+            --purple: #a855f7;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg: #ffffff;
+            --bg-card: #f9fafb;
+            --border: #e5e7eb;
+            --slate-800: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.7;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: var(--bg);
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            color: #111827;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 14px;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            color: #111827;
+            margin-top: 2.5rem;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1.8rem;
+            color: var(--primary-dark);
+        }
+
+        .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .step-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin: 20px 0;
+            border-left: 4px solid var(--blue);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--blue);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+
+        .step-container.goal { border-left-color: var(--green); }
+        .step-container.goal .step-number { background: var(--green); }
+        .step-container.important { border-left-color: var(--primary); }
+        .step-container.important .step-number { background: var(--primary); }
+        .step-container.warning { border-left-color: #ef4444; }
+        .step-container.warning .step-number { background: #ef4444; }
+
+        .screen-ref {
+            background: var(--slate-800);
+            color: #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
+            margin: 4px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        blockquote {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            margin: 1rem 0;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 6px 0 6px 28px;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: '☐';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .checklist li.done::before {
+            content: '✅';
+        }
+
+        .tip {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+
+        .tip::before {
+            content: '💡 Tip: ';
+            font-weight: 600;
+        }
+
+        .nav-path {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .nav-path strong {
+            color: var(--primary-dark);
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 28px;
+            margin: 20px 0;
+        }
+
+        .toc ol {
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin: 6px 0;
+        }
+
+        .toc a {
+            color: var(--blue);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        @media print {
+            body { font-size: 11pt; }
+            .step-container, .tip, .toc { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🧠 Echo — Guía Completa para Nuevos Usuarios</h1>
+    <p class="subtitle">Aprende a usar Echo desde cero. Esta guía te lleva por cada sección de la aplicación, explicando qué hace y cómo aprovecharla al máximo.</p>
+
+    <div class="toc">
+        <strong>📑 Contenido:</strong>
+        <ol>
+            <li><a href="#s1">Primer Acceso: Login y Registro</a></li>
+            <li><a href="#s2">El Dashboard Principal</a></li>
+            <li><a href="#s3">Catálogo de Templates</a></li>
+            <li><a href="#s4">Deploy Wizard: Crear tu Primer Bot</a></li>
+            <li><a href="#s5">Echo Brain: Subir Documentos</a></li>
+            <li><a href="#s6">Live Chat: Conversaciones en Vivo</a></li>
+            <li><a href="#s7">CRM Leads: Gestionar Clientes</a></li>
+            <li><a href="#s8">Operadores: Administrar tus Bots</a></li>
+            <li><a href="#s9">Configuración del Workspace</a></li>
+            <li><a href="#s10">Probar Todo el Flujo Completo</a></li>
+        </ol>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s1">1. Primer Acceso: Login y Registro</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Crear tu cuenta en Echo o iniciar sesión con una cuenta existente.</p>
+    </div>
+
+    <h3>1.1 Abrir Echo</h3>
+    <p>Abre tu navegador y ve a:</p>
+    <div class="screen-ref">http://localhost:3000</div>
+    <p>Verás la landing page de Echo. Haz clic en <strong>"Get Started"</strong> o navega directamente a la página de registro.</p>
+
+    <h3>1.2 Registrarte (primera vez)</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/register</strong></p>
+        <p>Completa el formulario con:</p>
+        <ul>
+            <li><strong>Nombre completo:</strong> Tu nombre</li>
+            <li><strong>Email:</strong> Un correo válido (será tu usuario)</li>
+            <li><strong>Contraseña:</strong> Mínimo 8 caracteres</li>
+        </ul>
+        <p>Haz clic en <strong>"Create Account"</strong>.</p>
+    </div>
+
+    <div class="tip">Si ya existe una cuenta demo, puedes usarla: <code>demo@eco.ai</code> / <code>demo1234</code></div>
+
+    <h3>1.3 Iniciar Sesión</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 2</span>
+        <p class="nav-path">Navega a: <strong>/login</strong></p>
+        <p>Ingresa tu email y contraseña. Haz clic en <strong>"Sign In"</strong>.</p>
+        <p>Si todo es correcto, serás redirigido automáticamente al Dashboard.</p>
+    </div>
+
+    <div class="step-container warning">
+        <span class="step-number">Importante</span>
+        <p>Echo usa <strong>JWT (JSON Web Tokens)</strong> para autenticación. El token se guarda en el navegador. Si cierras sesión, tendrás que volver a iniciar.</p>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s2">2. El Dashboard Principal</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Entender la estructura del dashboard oscuro profesional: KPI grid, gráficos, pipeline, heatmap, activity feed y panel de alertas.</p>
+    </div>
+
+    <h3>2.1 Barra Lateral (Sidebar)</h3>
+    <p>Al iniciar sesión verás el dashboard con una barra lateral oscura a la izquierda organizada en 3 grupos:</p>
+    <table>
+        <thead>
+            <tr><th>Grupo</th><th>Sección</th><th>¿Qué hace?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Principal</strong></td><td>Dashboard</td><td>Vista general con KPIs, pipeline, heatmap, métricas en tiempo real</td></tr>
+            <tr><td></td><td>Conversaciones</td><td>Chat en vivo con tus clientes. Intervención humana.</td></tr>
+            <tr><td></td><td>Leads</td><td>CRM: gestiona todos tus contactos y clientes</td></tr>
+            <tr><td><strong>IA &amp; Datos</strong></td><td>Brain/RAG</td><td>Sube documentos para que la IA aprenda de tu negocio</td></tr>
+            <tr><td></td><td>Análisis Sentimiento</td><td>Catálogo de templates de operadores IA</td></tr>
+            <tr><td><strong>Sistema</strong></td><td>Integraciones</td><td>Administra los bots que has desplegado</td></tr>
+            <tr><td></td><td>Configuración</td><td>API keys, canales, facturación</td></tr>
+        </tbody>
+    </table>
+
+    <h3>2.2 Intelligence Dashboard</h3>
+    <p>El dashboard principal ahora incluye:</p>
+    <ul>
+        <li><strong>6 KPI Cards:</strong> Nuevos Leads, Msgs Hoy, Resolución Bot %, Sentimiento, Tiempo Resp. IA, MRR — cada una con semáforo, valor, delta %</li>
+        <li><strong>Pipeline Funnel:</strong> Barras de conversión entre etapas (Nuevos → Calificados → Propuestas → Negociación → Cerrados)</li>
+        <li><strong>Heatmap:</strong> Actividad de mensajes por hora y día de la semana</li>
+        <li><strong>Sentiment Chart:</strong> Sentimiento 30 días (positivo/neutro/negativo)</li>
+        <li><strong>Channels Donut:</strong> Distribución WhatsApp vs Telegram</li>
+        <li><strong>Activity Feed:</strong> Eventos en tiempo real (mensajes, syncs, uploads)</li>
+        <li><strong>Health Panel:</strong> Semáforo de 7 servicios (Bot, HubSpot, Stripe, etc.)</li>
+        <li><strong>Revenue Chart:</strong> MRR + Leads 30 días (doble eje)</li>
+    </ul>
+
+    <h3>2.3 Header y Alert Strip</h3>
+    <p>El header muestra el título dinámico de la página, la fecha actual, selector de rango (Hoy/7d/30d), buscador, notificaciones y avatar. Debajo hay un <strong>alert strip</strong> con notificaciones del sistema categorizadas por color (rojo/ámbar/verde).</p>
+
+    <h3>2.4 Selector de Instancia (Operador Activo)</h3>
+    <p>En la parte superior de la barra lateral verás un <strong>selector desplegable</strong>. Aquí eliges con qué bot u operador estás trabajando. Las conversaciones, leads y brain se filtran según el operador seleccionado.</p>
+
+    <div class="tip">Si tienes varios bots (ej. uno de Ventas y otro de Soporte), cambia entre ellos desde este selector.</div>
+
+    <!-- ============================================ -->
+    <h2 id="s3">3. Catálogo de Templates</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Explorar los 5 templates pre-entrenados de Echo y elegir uno para tu negocio.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/catalog</strong> desde la barra lateral</p>
+        <p>Verás una cuadrícula con 5 tarjetas, una por cada tipo de operador:</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr><th>Template</th><th>Categoría</th><th>¿Para qué sirve?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Echo Ventas</strong></td><td>ventas</td><td>Asistente de ventas con catálogo RAG. Cotiza, califica leads, envía links de pago.</td></tr>
+            <tr><td><strong>Echo Soporte</strong></td><td>soporte</td><td>Soporte técnico con escalamiento inteligente a humanos.</td></tr>
+            <tr><td><strong>Echo Onboarding</strong></td><td>onboarding</td><td>Guía a nuevos clientes en registro y configuración inicial.</td></tr>
+            <tr><td><strong>Echo Cobranza</strong></td><td>cobranza</td><td>Recordatorios de pago, conciliación y alertas de vencimiento.</td></tr>
+            <tr><td><strong>Echo Assistant</strong></td><td>demo</td><td>Asistente multi-propósito. Ideal para pruebas y demostraciones.</td></tr>
+        </tbody>
+    </table>
+
+    <div class="step-container">
+        <span class="step-number">Paso 2</span>
+        <p>Haz clic en la tarjeta del template que te interese. Se abrirá el <strong>Deploy Wizard</strong>.</p>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s4">4. Deploy Wizard: Crear tu Primer Bot</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Desplegar un operador de IA completamente funcional en 3 pasos.</p>
+    </div>
+
+    <h3>4.1 Paso 1: Configuración Básica</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 1 de 3</span>
+        <p>Dependiendo del template elegido, verás diferentes campos:</p>
+        <ul>
+            <li><strong>Nombre del Bot:</strong> Cómo se llamará tu asistente (ej. "Ventas Express")</li>
+            <li><strong>Empresa:</strong> Nombre de tu negocio (obligatorio)</li>
+            <li><strong>Industria:</strong> Elige entre: ecommerce, salud, educación, restaurantes, automotriz, otro</li>
+            <li><strong>Idioma:</strong> Español (por defecto)</li>
+        </ul>
+        <p>Llena los campos y haz clic en <strong>"Next"</strong>.</p>
+    </div>
+
+    <h3>4.2 Paso 2: Canales y Herramientas</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 2 de 3</span>
+        <p>Elige por qué canales atenderá tu bot y qué herramientas usará:</p>
+        <ul>
+            <li><strong>Canales:</strong> WhatsApp, Telegram (o ambos)</li>
+            <li><strong>Herramientas:</strong> Brain (RAG con tus docs), CRM (gestión de leads), Webhook Out (envía datos a sistemas externos), Escalamiento (derivar a humano)</li>
+        </ul>
+        <p>Haz clic en <strong>"Next"</strong>.</p>
+    </div>
+
+    <h3>4.3 Paso 3: Resumen y Deploy</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 3 de 3</span>
+        <p>Revisa el resumen con toda la configuración que elegiste:</p>
+        <ul>
+            <li>Nombre del operador</li>
+            <li>Template base</li>
+            <li>Canales activos</li>
+            <li>Herramientas habilitadas</li>
+            <li>Configuración (empresa, industria, idioma)</li>
+        </ul>
+        <p>Si todo está correcto, haz clic en <strong>"Deploy"</strong>.</p>
+    </div>
+
+    <div class="step-container important">
+        <span class="step-number">Resultado</span>
+        <p>Tu bot se crea instantáneamente. Aparece en la sección <strong>Operators</strong> con estado <strong>"active"</strong>. También se genera un <strong>Webhook Token</strong> único que usarás para conectar WhatsApp o Telegram.</p>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s5">5. Echo Brain: Subir Documentos</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Alimentar al bot con conocimiento real de tu negocio para que responda con precisión.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/brain</strong> desde la barra lateral</p>
+        <p>Verás la sección Echo Brain. Aquí puedes subir documentos que el bot usará como fuente de conocimiento.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 2</span>
+        <p>Haz clic en el área de upload o arrastra archivos. Formatos soportados:</p>
+        <ul>
+            <li><strong>PDF</strong> — Catálogos, manuales, políticas</li>
+            <li><strong>TXT</strong> — FAQs, guiones, instrucciones</li>
+        </ul>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 3</span>
+        <p>Al subir un documento, Echo automáticamente:</p>
+        <ol>
+            <li><strong>Divide</strong> el texto en chunks (fragmentos pequeños)</li>
+            <li><strong>Genera embeddings</strong> (vectores de 3072 dimensiones con Gemini)</li>
+            <li><strong>Indexa</strong> los vectores en PostgreSQL con pgvector</li>
+        </ol>
+        <p>Verás el documento listado en la tabla con su nombre y fecha de subida.</p>
+    </div>
+
+    <div class="step-container important">
+        <span class="step-number">¿Cómo lo usa el bot?</span>
+        <p>Cuando un cliente pregunta algo, el bot <strong>busca los 3 fragmentos más relevantes</strong> de tus documentos y los incluye en el contexto antes de generar la respuesta. Esto se llama <strong>RAG (Retrieval-Augmented Generation)</strong>.</p>
+    </div>
+
+    <div class="tip">Sube el catálogo de productos, políticas de devolución, preguntas frecuentes y cualquier documento que tu equipo usaría para responder a clientes.</div>
+
+    <!-- ============================================ -->
+    <h2 id="s6">6. Live Chat: Conversaciones en Vivo</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Ver conversaciones en tiempo real, intervenir manualmente y controlar al bot.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/conversations</strong> desde la barra lateral</p>
+        <p>Verás una pantalla dividida en dos paneles:</p>
+        <ul>
+            <li><strong>Panel izquierdo:</strong> Lista de chats activos. Cada fila muestra el nombre del lead y el último mensaje.</li>
+            <li><strong>Panel derecho:</strong> La conversación seleccionada, con todos los mensajes entrantes y salientes.</li>
+        </ul>
+    </div>
+
+    <h3>6.1 Ver una Conversación</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 2</span>
+        <p>Haz clic en cualquier chat del panel izquierdo. El panel derecho cargará:</p>
+        <ul>
+            <li>Todos los mensajes entre el cliente y el bot (burbujas asimétricas con gradiente ámbar para salientes)</li>
+            <li>Estado del bot con indicador pulse: <span style="color:#22c55e">● AI activo</span> o <span style="color:#f59e0b">● AI pausado</span></li>
+            <li>Avatar con gradiente ámbar y nombre del lead</li>
+            <li>Indicador de escritura animado cuando el bot está generando respuesta</li>
+        </ul>
+    </div>
+
+    <h3>6.2 Responder Manualmente (Tomar el Control)</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 3</span>
+        <p>En la parte inferior del panel derecho hay un campo de texto con placeholder <code>"Escribe un mensaje..."</code> y botón circular de envío.</p>
+        <ol>
+            <li>Escribe tu mensaje</li>
+            <li>Presiona <strong>Enter</strong> o haz clic en el botón enviar</li>
+            <li>El mensaje se envía al cliente por el mismo canal (WhatsApp/Telegram)</li>
+        </ol>
+        <p><strong>Al enviar un mensaje manual, el bot se pausa automáticamente.</strong> Esto evita que la IA responda mientras tú estás atendiendo.</p>
+    </div>
+
+    <h3>6.3 Pausar y Reactivar el Bot</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 4</span>
+        <p>En la parte superior del panel derecho verás un botón ámbar:</p>
+        <ul>
+            <li><strong>"Pause AI"</strong> — Detiene la automatización. El bot deja de responder.</li>
+            <li><strong>"Resume AI"</strong> — Reactiva la IA. El bot vuelve a responder automáticamente con estilo gradiente ámbar.</li>
+        </ul>
+        <p>Esto te da control total: puedes intervenir cuando sea necesario y dejar que la IA maneje el resto.</p>
+    </div>
+
+    <div class="step-container important">
+        <span class="step-number">Tiempo Real</span>
+        <p>Las conversaciones se actualizan <strong>en tiempo real</strong> mediante WebSockets. No necesitas recargar la página para ver mensajes nuevos. Cuando un cliente escribe, el mensaje aparece instantáneamente en tu dashboard. Los chats en la lista muestran badges <span style="color:#10b981">AI</span> o <span style="color:#f59e0b">PAUSED</span>.</p>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s7">7. CRM Leads: Gestionar Clientes</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Ver, crear y gestionar todos los leads (clientes potenciales) que interactúan con tus bots.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/leads</strong> desde la barra lateral</p>
+        <p>Verás una tabla con todos los leads. Cada fila muestra:</p>
+        <ul>
+            <li><strong>Nombre</strong> del lead</li>
+            <li><strong>Teléfono</strong> o identificador del canal</li>
+            <li><strong>Canal:</strong> WhatsApp o Telegram</li>
+            <li><strong>Estado:</strong> new, contacted, qualified, converted, lost</li>
+            <li><strong>Sentimiento:</strong> positivo, neutral, negativo (analizado por IA)</li>
+            <li><strong>Fecha</strong> de creación</li>
+        </ul>
+    </div>
+
+    <h3>7.1 Crear un Lead Manualmente</h3>
+    <div class="step-container">
+        <span class="step-number">Paso 2</span>
+        <p>Haz clic en <strong>"Add Lead"</strong> (botón gradiente ámbar en la esquina superior derecha). Completa:</p>
+        <ul>
+            <li><strong>Name:</strong> Nombre del contacto</li>
+            <li><strong>Phone:</strong> Número de teléfono</li>
+            <li><strong>Channel:</strong> whatsapp o telegram</li>
+            <li><strong>Channel User ID:</strong> Identificador único del usuario en ese canal</li>
+        </ul>
+        <p>Haz clic en <strong>"Create"</strong>.</p>
+    </div>
+
+    <div class="tip">Para WhatsApp, el Channel User ID es el número de teléfono (ej. <code>5215512345678</code>). Para Telegram, es el ID numérico del chat.</div>
+
+    <h3>7.2 Leads Automáticos</h3>
+    <div class="step-container">
+        <span class="step-number">Automático</span>
+        <p>Cuando un cliente escribe por primera vez a tu bot, Echo <strong>crea automáticamente un Lead</strong> en el CRM. No necesitas hacer nada. El lead aparece con:</p>
+        <ul>
+            <li>Nombre: el número o username del cliente</li>
+            <li>Canal: detectado automáticamente</li>
+            <li>Estado inicial: "new"</li>
+            <li>Sentimiento: analizado en cada mensaje</li>
+        </ul>
+    </div>
+
+    <h3>7.3 Eliminar un Lead</h3>
+    <p>En la tabla de leads, cada fila tiene un botón de basura <strong>🗑️</strong>. Haz clic para eliminar el lead permanentemente.</p>
+
+    <h3>7.4 Sincronización con HubSpot</h3>
+    <p>Si configuraste la integración con HubSpot, los leads se sincronizan automáticamente como contactos. Los cambios en HubSpot se reflejan en Echo y viceversa.</p>
+
+    <!-- ============================================ -->
+    <h2 id="s8">8. Operadores: Administrar tus Bots</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Ver todos tus bots desplegados, su estado, canales y herramientas.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/operators</strong> desde la barra lateral</p>
+        <p>Verás una lista de todos los operadores que has creado. Cada uno muestra:</p>
+        <ul>
+            <li><strong>Nombre</strong> del operador</li>
+            <li><strong>Template</strong> base que usaste</li>
+            <li><strong>Estado:</strong> active, paused, draft</li>
+            <li><strong>Canales</strong> configurados (WhatsApp, Telegram)</li>
+            <li><strong>Herramientas</strong> habilitadas (Brain, CRM, Webhook)</li>
+            <li><strong>Webhook Token</strong> único para conectarlo a canales externos</li>
+        </ul>
+    </div>
+
+    <h3>8.1 Conectar un Bot a Telegram</h3>
+    <div class="step-container">
+        <span class="step-number">Configuración</span>
+        <p>Para que tu bot responda en Telegram:</p>
+        <ol>
+            <li>Crea un bot con <strong>@BotFather</strong> en Telegram y obtén el token</li>
+            <li>Expón tu backend con <strong>ngrok</strong>: <code>ngrok http 8000</code></li>
+            <li>Registra el webhook en Telegram:
+                <div class="screen-ref">https://api.telegram.org/bot{TOKEN}/setWebhook?url={NGROK_URL}/api/v1/webhooks/telegram/{WEBHOOK_TOKEN}</div>
+            </li>
+            <li>¡Listo! Los mensajes que lleguen a tu bot se procesarán con IA.</li>
+        </ol>
+    </div>
+
+    <h3>8.2 Conectar un Bot a WhatsApp</h3>
+    <div class="step-container">
+        <span class="step-number">Configuración</span>
+        <p>Requiere una cuenta de Meta Developer:</p>
+        <ol>
+            <li>Configura un App en <strong>Meta for Developers</strong></li>
+            <li>Obtén Phone Number ID, Access Token y Verify Token</li>
+            <li>Configura el Webhook apuntando a tu backend con ngrok</li>
+        </ol>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s9">9. Configuración del Workspace</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Configurar las credenciales y API keys de tu workspace.</p>
+    </div>
+
+    <div class="step-container">
+        <span class="step-number">Paso 1</span>
+        <p class="nav-path">Navega a: <strong>/settings</strong> desde la barra lateral</p>
+        <p>Aquí puedes configurar:</p>
+        <ul>
+            <li><strong>API Key de IA:</strong> Tu clave de Gemini/OpenAI para que el bot genere respuestas</li>
+            <li><strong>Token de Telegram:</strong> El token del bot de Telegram</li>
+            <li><strong>WhatsApp:</strong> Phone Number ID, Access Token, Verify Token</li>
+            <li><strong>HubSpot:</strong> Access Token y Portal ID (opcional, para sync CRM)</li>
+        </ul>
+    </div>
+
+    <div class="step-container important">
+        <span class="step-number">Importante</span>
+        <p>Estas credenciales son por <strong>workspace</strong>. Si tienes múltiples workspaces, cada uno tiene sus propias claves. Esto permite que agencias gestionen varios clientes con credenciales separadas.</p>
+    </div>
+
+    <!-- ============================================ -->
+    <h2 id="s10">10. Probar Todo el Flujo Completo</h2>
+
+    <div class="step-container goal">
+        <span class="step-number">Objetivo</span>
+        <p>Ejecutar el flujo completo de principio a fin para ver Echo en acción.</p>
+    </div>
+
+    <p>Sigue esta checklist para probar absolutamente todo:</p>
+
+    <h3>Checklist de Prueba Completa</h3>
+    <ol class="checklist">
+        <li><strong>Registrarse o iniciar sesión</strong> en /login</li>
+        <li><strong>Explorar el catálogo</strong> en /catalog — ver los 5 templates</li>
+        <li><strong>Desplegar un bot de Ventas</strong> desde el Deploy Wizard con estos datos:
+            <ul>
+                <li>Nombre: "Echo Ventas Demo"</li>
+                <li>Empresa: "Mi Empresa"</li>
+                <li>Industria: "ecommerce"</li>
+                <li>Idioma: "es"</li>
+                <li>Canales: WhatsApp + Telegram</li>
+                <li>Herramientas: Brain + CRM</li>
+            </ul>
+        </li>
+        <li><strong>Ir a /brain</strong> y subir un PDF de prueba (puede ser cualquier documento de texto)</li>
+        <li><strong>Ir a /leads</strong> y crear un lead manualmente:
+            <ul>
+                <li>Nombre: "Cliente de Prueba"</li>
+                <li>Teléfono: "+521550000000"</li>
+                <li>Canal: "whatsapp"</li>
+                <li>Channel User ID: "521550000000"</li>
+            </ul>
+        </li>
+        <li><strong>Ir a /conversations</strong> y revisar que el chat aparezca en la lista con badge AI/PAUSED</li>
+        <li><strong>Seleccionar el chat</strong> y ver los mensajes con burbujas asimétricas</li>
+        <li><strong>Enviar un mensaje manual</strong>: escribe en "Escribe un mensaje..." y presiona Enter</li>
+        <li><strong>Pausar el bot</strong>: haz clic en "Pause AI"</li>
+        <li><strong>Reactivar el bot</strong>: haz clic en "Resume AI"</li>
+        <li><strong>Ir a /operators</strong> y revisar que tu bot aparezca con estado "active"</li>
+        <li><strong>Ir a /settings</strong> y revisar la configuración del workspace</li>
+        <li><strong>Cerrar sesión</strong> y volver a iniciar para probar que el JWT funciona</li>
+    </ol>
+
+    <div class="step-container important">
+        <span class="step-number">¡Felicidades!</span>
+        <p>Si completaste todos los pasos, ya conoces Echo de principio a fin. Has desplegado un operador de IA, subido conocimiento, gestionado leads, intervenido en conversaciones en vivo y explorado todas las secciones del dashboard.</p>
+    </div>
+
+    <h3>Para Probar con Mensajes Reales (Telegram)</h3>
+    <div class="step-container">
+        <span class="step-number">Extra</span>
+        <ol>
+            <li>Abre una terminal y ejecuta: <code>ngrok http 8000</code></li>
+            <li>Copia la URL HTTPS que te da ngrok</li>
+            <li>Registra el webhook en Telegram usando el webhook token de tu operador</li>
+            <li>Abre Telegram y manda un mensaje a tu bot</li>
+            <li>Ve a /conversations en Echo — ¡verás la conversación en tiempo real!</li>
+        </ol>
+    </div>
+
+    <div class="tip">Para detener todo: <code>.\stop.ps1</code> (Windows) o <code>bash stop.sh</code> (Mac/Linux).</div>
+
+    <br>
+    <hr>
+    <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        <strong>Echo v0.1.0</strong> — Guía de Usuario — Junio 2026
+    </p>
+
+</body>
+</html>
