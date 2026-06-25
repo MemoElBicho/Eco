@@ -132,7 +132,7 @@ async def _async_process_message(
 
             ws_id_str = str(instance.organization_id)
 
-            lead_id, _ = await _resolve_or_create(
+            lead_id, lead_ws_id = await _resolve_or_create(
                 session,
                 channel,
                 from_user,
@@ -141,7 +141,7 @@ async def _async_process_message(
             )
 
             msg_in = Message(
-                workspace_id=ws_id_str,
+                workspace_id=lead_ws_id,
                 channel=channel,
                 channel_message_id=channel_message_id,
                 from_user=from_user,
@@ -153,7 +153,7 @@ async def _async_process_message(
             session.add(msg_in)
             await session.flush()
 
-            await manager.broadcast(ws_id_str, {
+            await manager.broadcast(lead_ws_id, {
                 "type": "new_message",
                 "lead_id": lead_id,
                 "message": {
@@ -174,7 +174,7 @@ async def _async_process_message(
             if lead:
                 cfg = await session.execute(
                     select(WorkspaceConfig).where(
-                        WorkspaceConfig.workspace_id == ws_id_str
+                        WorkspaceConfig.workspace_id == lead_ws_id
                     )
                 )
                 config = cfg.scalars().first()
@@ -190,7 +190,7 @@ async def _async_process_message(
                 else:
                     lead.sentiment_label = "neutral"
                 await session.flush()
-                await manager.broadcast(ws_id_str, {
+                await manager.broadcast(lead_ws_id, {
                     "type": "sentiment_update",
                     "lead_id": str(lead.id),
                     "sentiment": lead.sentiment,
@@ -203,7 +203,7 @@ async def _async_process_message(
 
             sub_result = await session.execute(
                 select(Subscription.plan, Subscription.status).where(
-                    Subscription.workspace_id == ws_id_str
+                    Subscription.workspace_id == lead_ws_id
                 )
             )
             sub_row = sub_result.first()
@@ -219,7 +219,7 @@ async def _async_process_message(
                 )
                 msg_count = await session.scalar(
                     select(func.count(Message.id)).where(
-                        Message.workspace_id == ws_id_str,
+                        Message.workspace_id == lead_ws_id,
                         Message.created_at >= first_of_month,
                     )
                 )
@@ -231,7 +231,7 @@ async def _async_process_message(
                 content,
                 str(instance.id),
                 session,
-                fallback_workspace_id=str(instance.organization_id),
+                fallback_workspace_id=lead_ws_id,
             )
             enabled_tools = [t for t in instance.tools if t.is_enabled]
             response = await generate_response(
@@ -243,7 +243,7 @@ async def _async_process_message(
                 enabled_tools=enabled_tools,
             )
             msg_out = Message(
-                workspace_id=ws_id_str,
+                workspace_id=lead_ws_id,
                 channel=channel,
                 from_user="eco_bot",
                 content=response,
@@ -254,7 +254,7 @@ async def _async_process_message(
             session.add(msg_out)
             await session.commit()
 
-            await manager.broadcast(ws_id_str, {
+            await manager.broadcast(lead_ws_id, {
                 "type": "new_message",
                 "lead_id": lead_id,
                 "message": {
