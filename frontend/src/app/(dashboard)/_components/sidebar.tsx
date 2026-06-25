@@ -186,7 +186,7 @@ export function Sidebar() {
             {user.name}
           </div>
         )}
-        <div className="text-[10px] text-[var(--t2)]/60 mt-1">Echo v0.1.0</div>
+        <div className="text-[10px] text-[var(--t2)]/60 mt-1">Echo v0.2.0</div>
       </div>
     </aside>
   )

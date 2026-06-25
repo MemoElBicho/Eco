@@ -159,8 +159,8 @@ Echo no compite construyendo modelos de IA propios ni reinventando infraestructu
 | Plan | Precio | Incluye |
 |---|---|---|
 | **Free** | $0/mes | 50 mensajes/mes, 1 documento, 3 leads |
-| **Pro** | $49/mes | Mensajes ilimitados, 50 documentos, leads ilimitados, HubSpot sync |
-| **Enterprise** | $199/mes | Multi-workspace, white-label, soporte prioritario, integraciones personalizadas |
+| **Pro** | $29/mes | Mensajes ilimitados, 50 documentos, leads ilimitados, HubSpot sync |
+| **Enterprise** | $99/mes | Multi-workspace, white-label, soporte prioritario, integraciones personalizadas |
 
 **Ventaja competitiva en pricing:** Al ser self-hosted, no hay costo de infraestructura para Echo. El cliente paga su propio VPS ($6/mes) + su API key de Gemini (pay-per-use).
 
@@ -278,4 +278,4 @@ Hay **330 millones de PYMES** en el mundo. La mayoría usa WhatsApp para comunic
 
 ---
 
-*Echo v0.1.0 — Junio 2026*
+*Echo v0.2.0 — Junio 2026*

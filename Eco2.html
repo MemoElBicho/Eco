@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Echo — Investor Pitch & Memoria Estrategica</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --primary-light: #fff7ed;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg-card: #f9fafb;
+            --border: #e5e7eb;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #ffffff;
+        }
+
+        h1, h2, h3 {
+            color: #111827;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 4px solid var(--primary);
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            margin-top: 2.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            color: #111827;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            color: var(--primary-dark);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        blockquote {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            margin: 1.5rem 0;
+            padding: 1.2rem;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+
+        blockquote strong {
+            font-style: normal;
+            color: #111827;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f3f4f6;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #fafafa;
+        }
+
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+
+        .badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-done {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .diagram-container {
+            background: var(--slate-800);
+            color: #f8fafc;
+            padding: 30px 24px;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .diagram-title {
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #fb923c;
+            text-align: center;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .timeline-flow {
+            position: relative;
+            padding-left: 40px;
+            margin: 10px 0;
+        }
+
+        .timeline-flow::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--slate-600);
+        }
+
+        .timeline-step {
+            position: relative;
+            margin-bottom: 25px;
+            background: var(--slate-700);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+        }
+
+        .timeline-step:last-child { margin-bottom: 0; }
+
+        .circle-number {
+            position: absolute;
+            left: -54px;
+            top: 12px;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.05rem;
+            border: 4px solid var(--slate-800);
+            box-shadow: 0 0 0 2px var(--primary);
+            z-index: 2;
+        }
+
+        .flow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            text-align: center;
+            align-items: center;
+        }
+
+        .circle-node {
+            background: var(--slate-700);
+            border: 2px solid #475569;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .circle-node strong {
+            font-size: 0.9rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .circle-node.accent {
+            border-color: var(--primary);
+            background: #431407;
+        }
+
+        .flow-arrow-horizontal {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .connector-row {
+            text-align: center;
+            margin: 15px 0;
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .multiagent-flex {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .agent-cluster {
+            background: #1e293b;
+            border: 1px dashed var(--primary);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .circle-node.subagent {
+            width: 100px;
+            height: 100px;
+            background: #0f172a;
+            border-color: #38bdf8;
+            font-size: 0.75rem;
+        }
+
+        .footer-tag {
+            margin-top: 4rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        @media print {
+            body { padding: 0; font-size: 10.5pt; }
+            h2 { page-break-after: avoid; }
+            .diagram-container {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                border: 2px solid #cbd5e1;
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+            .diagram-title { color: var(--primary-dark) !important; }
+            .timeline-step {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+            }
+            .circle-number { border-color: #ffffff !important; }
+            .circle-node {
+                background: #f1f5f9 !important;
+                color: #0f172a !important;
+                border: 2px solid #94a3b8 !important;
+            }
+            .circle-node strong { color: #0f172a !important; }
+            .circle-node.accent {
+                background: #ffedd5 !important;
+                border-color: var(--primary) !important;
+            }
+            .agent-cluster { background: #f8fafc !important; }
+            .circle-node.subagent {
+                background: #e0f2fe !important;
+                border-color: #0284c7 !important;
+            }
+            table, tr, blockquote { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Echo — Investor Pitch</h1>
+    <p class="subtitle">Plataforma Multi-Tenant de IA Conversacional con RAG, CRM y Despliegue en 2 Clics</p>
+
+    <blockquote>
+        <strong>Un operador de IA que vive en WhatsApp y Telegram, consume conocimiento interno indexado y organiza flujos comerciales de forma autónoma. Self-Hosted, soberanía absoluta de datos y márgenes de ganancia optimizados.</strong>
+    </blockquote>
+
+    <h2>1. ¿Qué es Echo?</h2>
+    <p>Echo es una plataforma <strong>self-hosted</strong> de automatización conversacional con inteligencia artificial. Unifica canales, conocimiento y retención de clientes en un núcleo operativo descentralizado:</p>
+    <ul>
+        <li><strong>Catálogo de Templates + Deploy Wizard:</strong> 5 verticales pre-entrenados. Elige uno, configura en 2 pasos, despliega. Sin código.</li>
+        <li><strong>Respuestas Fieles Automatizadas (RAG):</strong> Motor RAG basado en catálogos, políticas internas y manuales (PDF/TXT).</li>
+        <li><strong>CRM Nativo con Sentimiento:</strong> Calificación automática de leads por IA. Análisis semántico en tiempo real.</li>
+        <li><strong>Intervención Humana:</strong> Consola con WebSockets. "Pause AI" y el operador toma el control del chat en vivo.</li>
+        <li><strong>Sincronización Empresarial:</strong> Integración asíncrona bidireccional con HubSpot API v3.</li>
+        <li><strong>Soberanía de Datos:</strong> Corre en el servidor del cliente, cumplimiento normativo, blindaje de información.</li>
+    </ul>
+
+    <h2>2. ¿Para quién es? (Casos de Uso Verticales)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Vertical</th>
+                <th>Problema que resuelve</th>
+                <th>Caso Real en Echo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Inmobiliarias</strong></td><td>Atención tardía a prospectos fuera de horario.</td><td>Bot consulta precios y m² de PDFs, pre-califica en CRM.</td></tr>
+            <tr><td><strong>Clínicas / Salud</strong></td><td>Saturación en líneas de soporte médico.</td><td>Resuelve FAQs y deriva urgencias bajo infraestructura privada.</td></tr>
+            <tr><td><strong>E-commerce</strong></td><td>Cuellos de botella en soporte post-venta.</td><td>Estatus de pedidos automático desde base de datos interna.</td></tr>
+            <tr><td><strong>Hoteles / Agencias</strong></td><td>Pérdida de conversiones por lentitud.</td><td>Tarifas y políticas extraídas de folletos del hotel por WhatsApp.</td></tr>
+            <tr><td><strong>Consultorías</strong></td><td>Retrasos en búsqueda de documentos complejos.</td><td>Extracción exacta de cláusulas legales para personal y clientes.</td></tr>
+            <tr><td><strong>Colegios</strong></td><td>Fuga de matrículas por procesos lentos.</td><td>Captura estructurada de datos del tutor y envío de requisitos.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>3. ¿Cómo funciona? (Flujo RAG)</h2>
+    <div class="diagram-container">
+        <div class="diagram-title">Ciclo de Vida de un Mensaje (Webhook Asíncrono)</div>
+        <div class="timeline-flow">
+            <div class="timeline-step">
+                <div class="circle-number">1</div>
+                <strong>Entrada del Canal:</strong> Usuario envía mensaje por WhatsApp/Telegram &rarr; Webhook HTTP con token de operador a <strong>FastAPI</strong>.
+            </div>
+            <div class="timeline-step">
+                <div class="circle-number">2</div>
+                <strong>Encolamiento:</strong> API libera la conexión y delega a <strong>Celery + Redis</strong> en segundo plano.
+            </div>
+            <div class="timeline-step">
+                <div class="circle-number">3</div>
+                <strong>Filtro Vectorial:</strong> Worker convierte consulta en embedding y busca 3 fragmentos más relevantes en <strong>pgvector</strong>.
+            </div>
+            <div class="timeline-step">
+                <div class="circle-number">4</div>
+                <strong>Generación IA:</strong> Prompt enriquecido con contexto + system prompt del template &rarr; <strong>Gemini 2.5 Flash</strong> genera respuesta.
+            </div>
+            <div class="timeline-step">
+                <div class="circle-number">5</div>
+                <strong>Despacho:</strong> Worker envía respuesta al cliente y actualiza Dashboard vía <strong>WebSockets</strong> en tiempo real.
+            </div>
+        </div>
+    </div>
+
+    <h2>4. Stack Técnico</h2>
+    <table>
+        <thead>
+            <tr><th>Capa</th><th>Tecnología</th><th>Ventaja</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Backend Core</strong></td><td>FastAPI + Python 3.11</td><td>Async nativo, Pydantic v2, alta concurrencia.</td></tr>
+            <tr><td><strong>Base de Datos</strong></td><td>PostgreSQL 16 + pgvector</td><td>Relacional + vectorial: embeddings 3072d unificados.</td></tr>
+            <tr><td><strong>Procesamiento</strong></td><td>Celery + Redis</td><td>Aislamiento de tareas pesadas de IA, reintentos automáticos.</td></tr>
+            <tr><td><strong>Capa IA</strong></td><td>Gemini 2.5 Flash / gemini-embedding-001</td><td>Baja latencia, contexto extendido, mejor costo/token del mercado.</td></tr>
+            <tr><td><strong>Frontend</strong></td><td>Next.js 16 + Tailwind CSS v4 + Chart.js + @base-ui/react</td><td>Dashboard oscuro profesional, KPIs, gráficos, WebSocket en vivo.</td></tr>
+            <tr><td><strong>QA / CI</strong></td><td>pytest + Playwright E2E + GitHub Actions</td><td>8 tests end-to-end, 100% cobertura de flujos críticos, 8/8 pasan.</td></tr>
+        </tbody>
+    </table>
+
+    <div class="diagram-container">
+        <div class="diagram-title">Mapa de Arquitectura de Componentes</div>
+        
+        <div class="flow-grid">
+            <div class="circle-node">
+                <strong>📱 Canales</strong>
+                <small>WhatsApp / Telegram API</small>
+            </div>
+            <div class="flow-arrow-horizontal">&rarr;</div>
+            <div class="circle-node">
+                <strong>⚙️ Core API</strong>
+                <small>FastAPI & WebSockets</small>
+            </div>
+        </div>
+
+        <div class="connector-row">&darr; &uarr;</div>
+
+        <div class="flow-grid">
+            <div class="circle-node">
+                <strong>🔄 Tareas</strong>
+                <small>Celery Workers & Redis</small>
+            </div>
+            <div class="flow-arrow-horizontal">&harr;</div>
+            <div class="circle-node accent">
+                <strong>🤖 IA</strong>
+                <small>Gemini 2.5 & Vectors</small>
+            </div>
+        </div>
+
+        <div class="connector-row">&darr; &uarr;</div>
+
+        <div class="flow-grid">
+            <div class="circle-node">
+                <strong>🗄️ Persistencia</strong>
+                <small>PostgreSQL + pgvector</small>
+            </div>
+            <div class="flow-arrow-horizontal">&harr;</div>
+            <div class="circle-node accent">
+                <strong>🔌 Integración</strong>
+                <small>HubSpot API</small>
+            </div>
+        </div>
+    </div>
+
+    <h2>5. Filosofía: Harness Engineering</h2>
+    <blockquote>
+        <em>"No reinventamos la rueda. Ensamblamos los componentes más robustos de la industria y los hacemos operar juntos en perfecta sincronía."</em>
+    </blockquote>
+    <ul>
+        <li><strong>Template-driven:</strong> 5 verticales pre-entrenados. El Deploy Wizard abstrae la complejidad técnica.</li>
+        <li><strong>Estructura Antierror:</strong> Si el RAG no encuentra contexto suficiente, la automatización se detiene y transfiere al humano.</li>
+        <li><strong>Harness, not build:</strong> Gemini + pgvector + FastAPI + Celery. Lo mejor de cada mundo, integrado.</li>
+    </ul>
+
+    <h2>6. Modelo de Negocio</h2>
+    <p>Precios en <strong>Dólares Americanos (USD)</strong>, estándar global de software SaaS.</p>
+    
+    <table>
+        <thead>
+            <tr><th>Plan</th><th>Precio</th><th>Incluye</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Free</strong></td><td>$0/mes</td><td>50 mensajes, 1 documento, 3 leads.</td></tr>
+            <tr><td><strong>Pro</strong></td><td>$29/mes</td><td><strong>Mensajes ilimitados</strong>, 50 documentos, leads sin tope, HubSpot sync.</td></tr>
+            <tr><td><strong>Enterprise</strong></td><td>$99/mes</td><td>Multi-workspace, <strong>White-Label</strong>, integraciones personalizadas.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Análisis de Viabilidad</h3>
+    <ul>
+        <li><strong>Mensajes Ilimitados en Pro ($49):</strong> Competidores como ManyChat escalan precios al crecer contactos ($65+ por 5,000). Chatbase limita a 2,000 mensajes en plan de $19 y salta a $99 o $399. Echo no limita porque el costo de procesamiento lo absorbe el cliente (su propia API Key de Gemini + VPS de $6/mes).</li>
+        <li><strong>Margen Neto:</strong> Cercano al 100% para Echo. El cliente paga suscripción + infraestructura por separado.</li>
+        <li><strong>White-Label ($199):</strong> Agencias revenden Echo bajo su marca. Competencia cobra $300-$500+ por soluciones equivalentes.</li>
+    </ul>
+
+    <h2>7. Competencia</h2>
+    <table>
+        <thead>
+            <tr><th>Característica</th><th>Echo</th><th>Sintra.ai</th><th>ManyChat</th><th>Chatbase</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Self-hosted</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+            <tr><td>WA + Telegram</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+            <tr><td>CRM Nativo</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+            <tr><td>RAG sobre Docs</td><td>✅</td><td>⚠️</td><td>❌</td><td>✅</td></tr>
+            <tr><td>Templates Verticales</td><td>✅ 5</td><td>❌</td><td>❌</td><td>❌</td></tr>
+            <tr><td>White-Label</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Los Tres Pilares de Echo</h3>
+    <ol>
+        <li><strong>Soberanía Absoluta:</strong> Datos dentro del servidor del cliente. Crítico para sectores regulados (abogados, clínicas, finanzas).</li>
+        <li><strong>Integración Vertical Nativa:</strong> Echo reemplaza 4 herramientas (Chatbase + ManyChat + HubSpot + Live Chat) en un solo despliegue.</li>
+        <li><strong>Arquitectura por Roles:</strong> Enrutamiento avanzado para derivar flujos hacia agentes especializados por intención.</li>
+    </ol>
+
+    <h2>8. Roadmap</h2>
+    <ul>
+        <li><strong>Core Platform <span class="badge badge-done">Completado</span>:</strong> Backend FastAPI, Webhooks WhatsApp/Telegram, Dashboard Next.js con rediseño oscuro profesional (KPIs, Pipeline, Heatmap, Activity Feed, Health Panel), RAG pgvector, Brain docs, Catálogo Templates + Deploy Wizard, CRM Leads, HubSpot Sync, 8 tests E2E (8/8 pass), Docker Compose, Celery Worker, API de métricas backend.</li>
+        <li><strong>Monetización <span class="badge">Próximo</span>:</strong> Stripe suscripciones, facturación recurrente, webhooks de pago.</li>
+        <li><strong>Escalamiento <span class="badge">Planeado</span>:</strong> One-click deploy, White-label total, Analytics dashboard, Voice calls, Instagram DM, Multi-agente, No-code flow builder.</li>
+    </ul>
+
+    <h2>9. Arquitectura Multi-Agente (Fase 12)</h2>
+    <div class="diagram-container">
+        <div class="diagram-title">Enrutamiento Inteligente por Intención</div>
+        <div class="multiagent-flex">
+            <div class="circle-node accent">
+                <strong>📥 Entrada</strong>
+                <small>Mensaje del Cliente</small>
+            </div>
+            <div class="flow-arrow-horizontal">&rarr;</div>
+            <div class="circle-node">
+                <strong>🧠 Router</strong>
+                <small>Clasifica Intención</small>
+            </div>
+            <div class="flow-arrow-horizontal">&rarr;</div>
+            <div class="agent-cluster">
+                <div class="circle-node subagent">
+                    <strong>💰 Ventas</strong>
+                    <small>Catálogo & Cotizaciones</small>
+                </div>
+                <div class="circle-node subagent">
+                    <strong>🛠️ Soporte</strong>
+                    <small>Manuales Técnicos</small>
+                </div>
+                <div class="circle-node subagent">
+                    <strong>💳 Cobros</strong>
+                    <small>Links de Pago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>10. Conclusión</h2>
+    <p>330 millones de PYMES operan en WhatsApp y Telegram. Echo les da IA conversacional de nivel corporativo, protegiendo sus datos y eliminando la fragmentación de software, a un costo disruptivo en el mercado.</p>
+
+    <div class="footer-tag">
+        <strong>Echo Platform v0.2.0</strong> — Memoria Técnica de Inversión — Junio 2026
+    </div>
+
+</body>
+</html>
