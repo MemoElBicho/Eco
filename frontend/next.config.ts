@@ -1,8 +1,6 @@
 import type { NextConfig } from "next"
 
-const csp = process.env.CSP_DISABLED
-  ? ""
-  : [
+const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
