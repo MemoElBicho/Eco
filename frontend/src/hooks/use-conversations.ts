@@ -36,13 +36,21 @@ export function useMessages(leadId: string | null) {
     } finally { setLoading(false) }
   }, [leadId])
 
+  const silentRefresh = useCallback(async () => {
+    if (!leadId) return
+    try {
+      const msgs = await api.conversations.messages(leadId)
+      setMessages(msgs)
+    } catch {}
+  }, [leadId])
+
   useEffect(() => { refresh() }, [refresh])
 
   useEffect(() => {
     if (!leadId) return
-    const interval = setInterval(refresh, 4000)
+    const interval = setInterval(silentRefresh, 4000)
     return () => clearInterval(interval)
-  }, [leadId, refresh])
+  }, [leadId, silentRefresh])
 
   const pushMessage = useCallback((msg: MessageOut) => {
     if (msg.lead_id === leadId) {
