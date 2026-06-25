@@ -1,24 +1,26 @@
 import type { NextConfig } from "next"
 
-const csp = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data:",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "base-uri 'self'",
-  `connect-src 'self'${
-    process.env.NEXT_PUBLIC_API_URL
-      ? ` ${new URL(process.env.NEXT_PUBLIC_API_URL).origin}`
-      : ""
-  }${
-    process.env.NEXT_PUBLIC_WS_URL
-      ? ` ${new URL(process.env.NEXT_PUBLIC_WS_URL).origin}`
-      : ""
-  }`,
-].join("; ")
+const csp = process.env.CSP_DISABLED
+  ? ""
+  : [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' data:",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+      `connect-src 'self'${
+        process.env.NEXT_PUBLIC_API_URL
+          ? ` ${new URL(process.env.NEXT_PUBLIC_API_URL).origin}`
+          : ""
+      }${
+        process.env.NEXT_PUBLIC_WS_URL
+          ? ` ${new URL(process.env.NEXT_PUBLIC_WS_URL).origin}`
+          : ""
+      }`,
+    ].join("; ")
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -62,10 +64,14 @@ const nextConfig: NextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains; preload",
           },
-          {
-            key: "Content-Security-Policy",
-            value: csp,
-          },
+          ...(csp
+            ? [
+                {
+                  key: "Content-Security-Policy",
+                  value: csp,
+                },
+              ]
+            : []),
         ],
       },
     ]
