@@ -11,11 +11,11 @@ const csp = [
   "base-uri 'self'",
   `connect-src 'self'${
     process.env.NEXT_PUBLIC_API_URL
-      ? ` ${process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, "")}`
+      ? ` ${new URL(process.env.NEXT_PUBLIC_API_URL).origin}`
       : ""
   }${
     process.env.NEXT_PUBLIC_WS_URL
-      ? ` ${process.env.NEXT_PUBLIC_WS_URL.replace(/\/ws\/?$/, "")}`
+      ? ` ${new URL(process.env.NEXT_PUBLIC_WS_URL).origin}`
       : ""
   }`,
 ].join("; ")
