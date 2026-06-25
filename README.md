@@ -1,4 +1,4 @@
-# Eco — Plataforma Self-Hosted de Automatización Conversacional con IA
+# Echo — Plataforma Self-Hosted de Automatización Conversacional con IA
 
 Asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos internos, organiza tus clientes automáticamente y sincroniza con HubSpot. Corre en tu propio servidor.
 
@@ -16,30 +16,24 @@ Asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos intern
 [FastAPI Webhook] ───────────────────────────────────────┐
         │                                                 │
         ▼                                                 ▼
-[Celery Worker] ──► [pgvector / RAG]               [WebSocket Manager]
-        │               │                                 │
+[Celery Worker] ──► [pgvector / RAG]               [Next.js Dashboard]
+        │               │                                 ▲
         │               ▼                                 │
         │        [Gemini Embedding]                       │
         │               │                                 │
-        ▼               ▼                                 ▼
-[Gemini 2.5 Flash]  [WorkspaceConfig DB]          [Next.js Dashboard]
+        ▼               ▼                                 │
+[Gemini 2.5 Flash]  [PostgreSQL]                   [WebSocket + Polling]
         │                                                 ▲
         ▼                                                 │
 [HTTPX Sender] ──► WhatsApp/Telegram ─────────────────────┘
-        │
-        ├──► [HubSpot CRM] (sync bidireccional de contactos)
-        └──► [Stripe] (checkout, billing portal, webhooks)
 ```
 
 1. **Webhook público** — FastAPI recibe el mensaje entrante vía ngrok
-2. **Tarea asíncrona** — Celery encola `process_message`. Si la API de IA falla, reintenta hasta 3 veces con backoff exponencial
-3. **Búsqueda vectorial** — `query_brain` consulta pgvector con `cosine_distance` usando embeddings Gemini (3072d)
-4. **RAG con Gemini** — `agent.py` combina contexto del Brain con el mensaje y genera respuesta con Gemini 2.5 Flash
-5. **Despacho dinámico** — `telegram_client.py` / `whatsapp_client.py` leen tokens desde `WorkspaceConfig` por workspace
-6. **Tiempo real** — `WebSocket Manager` transmite cada mensaje al dashboard Next.js sin recargar
-7. **Live Chat Hub** — El humano pausa el bot, envía respuestas manuales y reactiva la IA
-8. **HubSpot Sync** — Sincronización bidireccional de contactos (Eco → HubSpot y HubSpot → Eco vía webhooks)
-9. **Stripe Billing** — Planes Free/Pro/Enterprise con checkout, portal de facturación y webhooks de pago
+2. **Tarea asíncrona** — Celery encola `process_message`. Si la API de IA falla, reintenta hasta 3 veces con backoff
+3. **Búsqueda vectorial** — `query_brain` consulta pgvector con `cosine_distance` (embeddings Gemini 3072d)
+4. **RAG con Gemini** — `agent.py` combina contexto del Brain con el mensaje y genera respuesta
+5. **Despacho** — `telegram_client.py` / `whatsapp_client.py` envían la respuesta al cliente
+6. **Dashboard en vivo** — Polling cada 4s actualiza mensajes en el Intelligence Dashboard
 
 ---
 
@@ -47,16 +41,20 @@ Asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos intern
 
 | Característica | Descripción |
 |---|---|
-| **Multi-tenant dinámico** | Cada workspace tiene sus propios tokens (Telegram, WhatsApp, OpenAI) almacenados en `WorkspaceConfig` de la DB. Configurables desde el dashboard. |
-| **Human-in-the-Loop** | Campo `bot_active` en `Lead`. Cuando un humano toma control (`PATCH /toggle-bot`), Celery hace early return y no invoca a la IA. El agente envía mensajes manualmente vía `POST /send-manual` con desactivación automática del bot. |
-| **WebSockets bidireccionales** | `ConnectionManager` en FastAPI agrupa conexiones por `workspace_id`. Cada mensaje nuevo (`in` u `out`) se transmite instantáneamente al frontend. |
-| **Resiliencia ante fallos** | Celery `autoretry_for=(OpenAIError,)` con `retry_backoff=True` y `max_retries=3`. Si Gemini devuelve 503, el worker reintenta sin crashear. |
-| **pgvector + RAG** | Documentos PDF/TXT se chunked, se generan embeddings con Gemini, se almacenan en PostgreSQL y se recuperan por similitud coseno. |
-| **Dashboard shadcn/ui** | Next.js 16 + Tailwind CSS + shadcn/ui. Sidebar con Leads (CRUD + HubSpot badge), Brain (upload + lista), Live Chat Hub (split layout + WebSocket), Settings (API keys + HubSpot + Facturación). |
-| **CRM + HubSpot Sync** | Leads con `hs_contact_id` y `hs_last_sync`. Webhook inbound de HubSpot con resolución de conflictos por timestamp. Celery task outbound para crear/actualizar contactos. |
-| **Suscripciones Stripe** | Planes Free/Pro/Enterprise. Checkout, Billing Portal y webhook `checkout.session.completed`. Límites Free Plan (50 msgs/mes). |
-| **Análisis de Sentimiento** | Gemini clasifica cada mensaje (positivo/neutro/negativo) con score -1.0 a 1.0. Visible en dashboard. |
-| **Tests + CI/CD** | pytest con fixtures async, db_session con rollback por test. Playwright E2E (auth, leads, brain, conversations, webhooks). GitHub Actions con PostgreSQL + Redis. |
+| **Intelligence Dashboard** | KPIs en tiempo real, Pipeline Funnel, Heatmap 7×24, Sentiment Chart, Channels Donut, Activity Feed, Health Panel, Revenue Chart |
+| **Dashboard oscuro profesional** | Diseño dark theme con tokens CSS (#060C1A), sidebar 3 secciones, gradientes ámbar, animaciones |
+| **Catálogo + Deploy Wizard** | 5 templates pre-entrenados (Ventas, Soporte, Onboarding, Cobranza, Assistant). Despliega en 3 pasos |
+| **Live Chat Hub** | Chat en vivo con burbujas asimétricas, Pause AI/Resume AI, indicador de escritura |
+| **CRM Leads** | Tabla con score bars, emojis de sentimiento, badges de estado, Add Lead, chat inline |
+| **Echo Brain (RAG)** | Upload de PDFs/TXT, chunking, embeddings Gemini, búsqueda vectorial pgvector |
+| **Human-in-the-Loop** | Campo `bot_active` en Lead. Botón "Pause AI"/"Resume AI" para tomar control manual |
+| **Multi-tenant** | Workspaces independientes con sus propios tokens, leads y configuraciones |
+| **HubSpot Sync** | Sincronización bidireccional de contactos con resolución de conflictos por timestamp |
+| **Stripe Billing** | Planes Free ($0) / Pro ($29) / Enterprise ($99) con checkout y portal |
+| **Análisis de Sentimiento** | Gemini clasifica cada mensaje (positivo/neutro/negativo) con score -1.0 a 1.0 |
+| **Métricas Backend** | API `/api/v1/metrics/overview`, `/activity`, `/health` para datos en tiempo real |
+| **Tests E2E** | 8 tests Playwright automatizados: auth, brain, leads, conversations, smoke (deploy + webhook) |
+| **CSP + Seguridad** | Content Security Policy, X-Frame-Options, HSTS, JWT auth |
 
 ---
 
@@ -66,85 +64,56 @@ Asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos intern
 
 - Docker Desktop
 - Node.js 20+
+- ngrok (para webhooks públicos)
 
-### Opción A: Un solo comando (recomendado para demo)
+### Un solo comando
 
-```bash
+```powershell
 # Windows
-dev.bat
-
-# Linux / Mac
-chmod +x dev.sh && ./dev.sh
+.\dev.ps1
 ```
 
-Este script se encarga de **todo**:
+Este script:
 1. Copia `.env.example` → `.env` si no existe
 2. Levanta PostgreSQL, Redis, Backend y Celery con Docker Compose
-3. Espera a que PostgreSQL esté saludable
-4. Ejecuta migraciones de Alembic (`alembic upgrade head`)
-5. Pobla datos de prueba (`seed_data.py`)
-6. Instala dependencias npm si es necesario
-7. Inicia el frontend en `http://localhost:3000`
+3. Ejecuta migraciones de Alembic
+4. Pobla datos de prueba (demo user, templates, leads)
+5. Compila y lanza el frontend en `http://localhost:3000`
 
-Al terminar, abre el navegador, regístrate en `/register` y explora el dashboard.
+### Demo login
+
+```
+Email:  demo@eco.ai
+Pass:   demo1234
+```
 
 ### Apagar todo
 
-```bash
-# Windows
-stop.bat
-
-# Linux / Mac
-chmod +x stop.sh && ./stop.sh
+```powershell
+.\stop.ps1
 ```
 
-Los datos en PostgreSQL y Redis se conservan. Para volver a iniciar, ejecutá `dev.bat` o `dev.sh` de nuevo.
+Detiene frontend + contenedores Docker. Los datos se conservan.
 
-### Opción B: Paso a paso
+### Reset completo (borra TODO y empieza de cero)
 
-```bash
-git clone <repo-url> Eco
-cd Eco
-cp .env.example .env       # Linux/Mac
-# copy .env.example .env   # Windows
-
-# Editar .env con tus API keys
-# (mínimo: SECRET_KEY, OPENAI_API_KEY)
-# El resto de tokens se configuran por workspace desde el dashboard (/settings)
-
-docker compose up -d
-docker compose run --rm -e PYTHONPATH=/app backend alembic upgrade head
-docker compose run --rm -e PYTHONPATH=/app backend python seed_data.py
-
-cd frontend
-npm install
-npm run dev
+```powershell
+.\reset.ps1
 ```
 
-Abrir [http://localhost:3000](http://localhost:3000).
+### Exponer webhooks (ngrok)
 
-### exponer webhooks (ngrok)
-
-Si necesitás recibir mensajes reales de Telegram/WhatsApp:
-
-```bash
+```powershell
 ngrok http 8000
 ```
 
-| Canal | Registro de Webhook |
-|---|---|
-| Telegram | `POST https://api.telegram.org/bot{TOKEN}/setWebhook?url={NGROK_URL}/api/v1/webhooks/telegram` |
-| WhatsApp | Configurar en Meta Developer Dashboard con `{NGROK_URL}/api/v1/webhooks/whatsapp` |
+Luego configura el webhook de Telegram:
 
-> Los tokens de WhatsApp y Telegram pueden configurarse por workspace desde el dashboard (`/settings`). Los valores en `.env` actúan como fallback si un workspace no tiene configuración propia.
-
-### Primeros pasos en el dashboard
-
-1. **Registrate** en `/register` con email y contraseña
-2. **Cargá tu catálogo** en `/brain` (PDF o TXT con productos, precios, políticas)
-3. **Configurá tus tokens** en `/settings` (Telegram, WhatsApp, Gemini)
-4. **Monitoreá leads** en `/leads` y **chateá en vivo** en `/conversations`
-5. Cuando un cliente escriba por Telegram o WhatsApp, vas a ver la conversación en tiempo real
+```powershell
+$u = (Invoke-RestMethod http://127.0.0.1:4040/api/tunnels).tunnels[0].public_url
+$token = "TU_BOT_TOKEN"
+Invoke-RestMethod "https://api.telegram.org/bot$token/setWebhook?url=$u/api/v1/webhooks/telegram"
+```
 
 ---
 
@@ -154,37 +123,37 @@ ngrok http 8000
 Eco/
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/           # Routers FastAPI (auth, brain, leads, conversations, settings, billing, webhooks/)
-│   │   │   └── webhooks/      # telegram, whatsapp, stripe, hubspot
+│   │   ├── api/v1/           # Routers FastAPI (auth, brain, leads, conversations, settings, billing, webhooks, metrics)
 │   │   ├── core/              # WebSocket ConnectionManager
-│   │   ├── models/            # SQLAlchemy (User, Workspace, Lead, Message, BrainDocument, WorkspaceConfig)
+│   │   ├── models/            # SQLAlchemy (User, Workspace, Lead, Message, BrainDocument, etc.)
 │   │   ├── schemas/           # Pydantic (request/response)
-│   │   ├── services/          # agent.py, brain.py, sentiment.py, hubspot_client.py, telegram_client.py, whatsapp_client.py, limits.py
-│   │   ├── tasks/             # celery_app.py, ai_tasks.py, hubspot_tasks.py
-│   │   ├── config.py          # pydantic-settings
-│   │   └── database.py        # SQLAlchemy async engine
+│   │   ├── services/          # agent.py, brain.py, sentiment.py, telegram_client.py, whatsapp_client.py
+│   │   └── tasks/             # celery_app.py, ai_tasks.py, hubspot_tasks.py
 │   ├── alembic/               # Migraciones
-│   ├── tests/                  # pytest (auth, leads, brain, conversations, settings, sentiment, billing, webhooks)
-│   ├── requirements.txt
+│   ├── tests/                 # pytest
 │   └── Dockerfile
 ├── frontend/
 │   ├── src/
-│   │   ├── app/(dashboard)/   # Rutas: brain, leads, conversations, settings
-│   │   ├── components/        # shadcn/ui + componentes de negocio (chat-list, chat-window, message-bubble)
-│   │   ├── hooks/             # useLeads, useBrain, useConversations, useWebSocket, useAuth
+│   │   ├── app/(dashboard)/   # Rutas: page.tsx, leads, conversations, brain, catalog, operators, settings, pricing
+│   │   ├── components/
+│   │   │   ├── dashboard/     # 11 componentes: kpi-card, pipeline-funnel, heatmap, activity-feed, etc.
+│   │   │   └── conversations/ # chat-list, chat-window, message-bubble
+│   │   ├── hooks/             # useMetrics, useConversations, useLeads, useBrain, useWebSocket, useAuth
 │   │   └── lib/               # api.ts (fetch wrapper), types
-│   ├── e2e/                   # Playwright E2E (auth, leads, brain, conversations)
-│   ├── playwright.config.ts
+│   ├── e2e/                   # Playwright E2E (auth, leads, brain, conversations, smoke)
 │   └── package.json
-├── .github/workflows/          # GitHub Actions CI (test.yml)
+├── docs/                       # echo-architecture-flow.html, echo-investor-deck.html
+├── .github/workflows/          # GitHub Actions CI
 ├── docker-compose.yml
 ├── .env.example
-├── dev.bat                     # Inicio rápido Windows
-├── dev.sh                      # Inicio rápido Linux/Mac
-├── stop.bat                    # Apagar todo Windows
-├── stop.sh                     # Apagar todo Linux/Mac
+├── dev.ps1                     # Inicio rápido Windows
+├── stop.ps1                    # Apagar todo
+├── reset.ps1                   # Reset completo
+├── Eco2.html                   # Investor Pitch & Memoria Estratégica
 ├── ECO_FLOW.html               # Diagrama interactivo de flujo completo
-└── INVESTORS.md                # Documento para inversores
+├── ECHO_USER_GUIDE.html        # Guía completa de usuario
+├── INVESTORS.md                # Documento para inversores
+└── README.md
 ```
 
 ---
@@ -200,9 +169,10 @@ Eco/
 | **Mensajería** | Telegram Bot API, Meta WhatsApp Cloud API v21.0 |
 | **CRM Externo** | HubSpot API v3 (sync bidireccional) |
 | **Pagos** | Stripe Checkout + Billing Portal + Webhooks |
-| **Frontend** | Next.js 16 (App Router), Tailwind CSS v4, shadcn/ui |
-| **Tiempo real** | FastAPI WebSockets |
-| **Tests** | pytest + pytest-asyncio, Playwright E2E |
+| **Frontend** | Next.js 16 (App Router), Tailwind CSS v4, Chart.js, @base-ui/react |
+| **Dashboard** | 11 componentes (KPIs, Pipeline, Heatmap, Sentiment, Activity Feed, Health, Revenue) |
+| **Tiempo real** | FastAPI WebSockets + Polling (4s) |
+| **Tests** | pytest + pytest-asyncio, Playwright E2E (8 tests, 8/8 pass) |
 | **CI/CD** | GitHub Actions (postgres + redis services) |
 | **Infraestructura** | Docker Compose, ngrok |
 | **Auth** | JWT + bcrypt |
@@ -212,21 +182,24 @@ Eco/
 ## 🧪 Tests
 
 ```bash
-# Backend (requiere PostgreSQL + Redis)
-cd backend
-pytest -v
+# Backend
+cd backend && pytest -v
 
-# E2E (requiere backend corriendo en :8000)
-cd frontend
-npx playwright test
+# E2E (requiere backend en :8000)
+cd frontend && npx playwright test --project=chromium
+# Resultado esperado: 8 passed
 ```
 
 ---
 
 ## 📄 Documentos Relacionados
 
-- **`INVESTORS.md`** — Pitch para inversores: qué es Eco, modelo de negocio, roadmap, competencia
-- **`ECO_FLOW.html`** — Diagrama interactivo React Flow con el flujo completo de uso paso a paso
+- **`Eco2.html`** — Investor Pitch & Memoria Estratégica (v0.2.0)
+- **`INVESTORS.md`** — Pitch para inversores: qué es, modelo de negocio, roadmap, competencia
+- **`ECO_FLOW.html`** — Diagrama interactivo React Flow del flujo completo
+- **`ECHO_USER_GUIDE.html`** — Guía completa paso a paso para nuevos usuarios
+- **`docs/echo-architecture-flow.html`** — Diagrama de arquitectura técnica
+- **`docs/echo-investor-deck.html`** — Deck de inversión
 
 ---
 
