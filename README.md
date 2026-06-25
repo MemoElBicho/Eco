@@ -17,8 +17,9 @@ Asistente de IA que vive en tu WhatsApp y Telegram, conoce tus documentos intern
 
 ### 1. Clonar
 
+Clona el repositorio y entra al directorio:
+
 ```bash
-git clone https://github.com/MemoElBicho/Eco.git
 cd Eco
 ```
 
