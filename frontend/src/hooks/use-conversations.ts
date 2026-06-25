@@ -28,9 +28,12 @@ export function useMessages(leadId: string | null) {
   const refresh = useCallback(async () => {
     if (!leadId) { setMessages([]); return }
     setLoading(true)
-    try { setMessages(await api.conversations.messages(leadId)) }
-    catch {}
-    finally { setLoading(false) }
+    try {
+      const msgs = await api.conversations.messages(leadId)
+      setMessages(msgs)
+    } catch (e) {
+      console.error("useMessages fetch error:", e)
+    } finally { setLoading(false) }
   }, [leadId])
 
   useEffect(() => { refresh() }, [refresh])
