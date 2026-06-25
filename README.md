@@ -95,7 +95,7 @@ Pass:   demo1234
 
 Detiene frontend + contenedores Docker. Los datos se conservan.
 
-### Reset completo (borra TODO y empieza de cero)
+### Reset completo (apaga y vuelve a levantar todo)
 
 ```powershell
 .\reset.ps1
